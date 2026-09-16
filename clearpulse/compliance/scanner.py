@@ -50,6 +50,26 @@ def severity_from_findings(count: int) -> str:
     return "INFO"
 
 
+def assert_paths_within_root(paths: Iterable[str], root: str) -> None:
+    """Raise ``ValueError`` if any path resolves outside ``root``.
+
+    Used to confine *caller-supplied* scan targets that arrive over an untrusted
+    boundary (the REST gateway) to a single subtree. Trusted in-process callers
+    -- the CLI, the demo, the test-suite -- keep scanning any path they pass, so
+    this deliberately validates without rewriting the caller's path strings.
+
+    Symlinks are resolved before the comparison, so a link pointing out of
+    ``root`` is rejected rather than followed.
+    """
+    root_real = os.path.realpath(root)
+    for path in paths:
+        # ``join`` leaves an absolute ``path`` untouched, so absolute targets
+        # already inside ``root`` still resolve and pass.
+        candidate = os.path.realpath(os.path.join(root_real, path))
+        if candidate != root_real and not candidate.startswith(root_real + os.sep):
+            raise ValueError(f"scan path escapes the permitted root: {path!r}")
+
+
 class PHIScanner:
     """Scans text and files for unencrypted identifiers."""
 
