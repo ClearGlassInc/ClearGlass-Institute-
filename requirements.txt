@@ -40,7 +40,7 @@ Pillow>=12.3.0    # Image processing
 # Utilities
 python-dateutil>=2.9.0.post0
 pytz>=2026.3.post1
-tqdm>=4.70.0
+tqdm>=4.70.1
 
 # Optional: Production Enhancements
 # psycopg2-binary>=2.9.0  # PostgreSQL support
