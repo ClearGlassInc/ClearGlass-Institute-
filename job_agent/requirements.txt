@@ -3,4 +3,4 @@
 
 # Genuinely tailored resume/outreach copy via the Claude personalization engine.
 # Activated automatically when ANTHROPIC_API_KEY is set.
-anthropic>=1.0.0
+anthropic>=1.5.0
