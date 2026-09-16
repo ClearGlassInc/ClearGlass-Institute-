@@ -1,0 +1,6 @@
+# The Job Automation Agent stack runs with the Python standard library only.
+# The packages below are OPTIONAL and enable specific upgrades:
+
+# Genuinely tailored resume/outreach copy via the Claude personalization engine.
+# Activated automatically when ANTHROPIC_API_KEY is set.
+anthropic>=1.0.0

@@ -1,0 +1,121 @@
+{
+  "id": "clearglass-trust-infrastructure",
+  "title": "ClearGlass Trust Infrastructure Deployment",
+  "brand": "ClearGlass Inc.",
+  "tone": "institutional, measured, evidence-first",
+  "coreFrame": [
+    "Digital trust is infrastructure.",
+    "Verification replaces assumption.",
+    "Security is dignity for citizens and stability for markets."
+  ],
+  "pillars": [
+    "Identity as the new border",
+    "Transparency as competitive advantage",
+    "Citizens as the security perimeter",
+    "Canada positioned to lead in ethical digital infrastructure"
+  ],
+  "notion": {
+    "database": "ClearGlass Institutional Deployment Queue",
+    "owner": "ClearGlass Inc."
+  },
+  "visual": {
+    "background": "solid black or white",
+    "accent": "1px silver",
+    "titleFont": "Georgia, serif",
+    "bodyFont": "Arial, sans-serif",
+    "codeFont": "Courier New, monospace"
+  },
+  "posts": [
+    {
+      "id": "trust-is-infrastructure",
+      "title": "Trust Is Infrastructure",
+      "pillar": "verified-trust",
+      "channels": ["linkedin", "x"],
+      "body": "Digital trust is infrastructure. If institutions cannot verify identity, information, and decisions, confidence becomes fragile. The strategic requirement is simple: truth must be verifiable, identity must be secure, and governance must be auditable.",
+      "cta": "Build systems people can verify, not merely believe.",
+      "status": "draft"
+    },
+    {
+      "id": "identity-is-sovereignty",
+      "title": "Identity Is Sovereignty",
+      "pillar": "identity-integrity",
+      "channels": ["linkedin", "x"],
+      "body": "Identity is now part of the security perimeter. Strong authentication, recovery discipline, device protection, and transparent identity controls are not optional conveniences. They are the foundation of digital sovereignty for citizens and institutions.",
+      "cta": "Protect identity like infrastructure.",
+      "status": "draft"
+    },
+    {
+      "id": "cybersecurity-is-public-service",
+      "title": "Cybersecurity Is Public Service",
+      "pillar": "civic-resilience",
+      "channels": ["linkedin", "x"],
+      "body": "Cybersecurity is public service. Municipal resilience depends on secure portals, tested incident escalation, offline-integrity backups, recurring staff literacy, and public evidence that weaknesses are being fixed.",
+      "cta": "Cities earn trust by proving readiness and clarity.",
+      "status": "draft"
+    },
+    {
+      "id": "ai-needs-auditability",
+      "title": "AI Without Audit Trails Is Ungovernable",
+      "pillar": "ai-governance",
+      "channels": ["linkedin", "x"],
+      "body": "Canada can lead in ethical AI only if it leads in verified trust first. Civic AI requires public auditability, accountable decision records, secure identity controls, and clear responsibility when systems fail.",
+      "cta": "Ethical AI and secure AI are the same mission.",
+      "status": "draft"
+    },
+    {
+      "id": "digital-maturity-is-civic-power",
+      "title": "Digital Maturity Is Civic Power",
+      "pillar": "citizen-literacy",
+      "channels": ["linkedin", "x"],
+      "body": "Digital resilience starts with disciplined habits: MFA, password managers, recovery codes stored offline, device encryption, SIM protection, and verification before belief. Citizens are not passive users. They are part of the security perimeter.",
+      "cta": "Digital maturity is civic power.",
+      "status": "draft"
+    }
+  ],
+  "whitepaper": {
+    "title": "CLEARGLASS FRAMEWORK: Public Trust Architecture for the Algorithmic Era",
+    "subtitle": "Verified trust as civic infrastructure for identity, transparency, literacy, security, and accountable governance.",
+    "sections": [
+      {
+        "heading": "1. Executive Summary",
+        "body": "The digital era has rewritten the foundations of legitimacy. Trust is no longer only a social sentiment; institutions and citizens increasingly need verifiable systems that authenticate information, identity, and governance. ClearGlass frames verified trust as civic infrastructure for stability, transparency, and digital sovereignty."
+      },
+      {
+        "heading": "2. Problem Statement: Truth Volatility and Identity Fragility",
+        "body": "Information chaos, identity exploitation, and public-confidence erosion create systemic risk. When authenticity cannot be established quickly and independently, institutions become slower, citizens become more vulnerable, and governance becomes harder to audit."
+      },
+      {
+        "heading": "3. Strategic Principle: Verified Trust as Civic Infrastructure",
+        "body": "The operating premise is direct: truth must be verifiable, identity must be secure, and governance must be auditable. Verification replaces assumption and makes trust measurable rather than rhetorical."
+      },
+      {
+        "heading": "4. Identity Architecture",
+        "body": "Identity integrity requires layered authentication, cryptographic controls where appropriate, secure recovery paths, device protection, and strong operational discipline. Identity assurance should be treated as a civil and institutional necessity."
+      },
+      {
+        "heading": "5. Governance Framework",
+        "body": "Transparent information protocols and public audit trails should make important decisions inspectable. Governance should scale clarity, define responsibility, preserve evidence, and create an accountability loop that can be reviewed after the fact."
+      },
+      {
+        "heading": "6. Security Stack",
+        "body": "Resilience spans citizen, municipal, and national layers. Critical controls include secure public-service portals, incident escalation paths, staff cyber-literacy onboarding, tested backups with offline integrity checks, and public-facing trust metrics."
+      },
+      {
+        "heading": "7. Digital Literacy Doctrine",
+        "body": "Public resilience improves when citizens understand identity defense, device security, secure communication habits, deepfake and disinformation recognition, password vaulting, MFA, recovery procedures, and civic reporting channels."
+      },
+      {
+        "heading": "8. Public-Private Coordination Standards",
+        "body": "Government, research institutions, universities, financial-sector leaders, and security practitioners can coordinate through clearly bounded operating rules, audit cadence, literacy programs, research, municipal pilots, and measurable standards."
+      },
+      {
+        "heading": "9. Implementation Roadmap",
+        "body": "Within 90 days: public-literacy modules, a municipal cyber assessment, and a trust-scoring prototype. Within 12 months: a regional trust pilot, verification portal, and citizen cyber certificate. Within 36 months: a broader trust standard, transparent governance framework, and public audit layer."
+      },
+      {
+        "heading": "10. Measurable Outcomes and Audit Criteria",
+        "body": "Track literacy uplift, incident reduction, engagement quality, audit completion, identity-control adoption, remediation closure, and pilot performance. The purpose is not to claim trust; it is to prove readiness, accountability, and clarity through evidence."
+      }
+    ]
+  }
+}

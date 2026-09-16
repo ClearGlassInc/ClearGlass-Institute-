@@ -1,0 +1,35 @@
+name: Azure Function App Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-functions-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-configuration:
+    name: validate-configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Inspect Azure Functions project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f host.json ] && find . -name function.json -print -quit | grep -q .; then
+            echo "Azure Functions project files detected."
+          else
+            echo "No Azure Functions project files detected."
+            echo "This workflow is intentionally manual and non-deploying until host.json, function.json, AZURE_FUNCTIONAPP_NAME, and AZURE_FUNCTIONAPP_PUBLISH_PROFILE are configured."
+          fi
+
+      - name: Configuration result
+        shell: bash
+        run: |
+          echo "Azure deployment is disabled by design for this repository until real Azure Function app configuration exists."

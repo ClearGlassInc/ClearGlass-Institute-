@@ -1,0 +1,137 @@
+# ============================================
+# TASK 6: QA Bot with LangChain + Gradio
+# ============================================
+
+import gradio as gr
+from langchain_ibm import WatsonxEmbeddings, WatsonxLLM
+from langchain_community.vectorstores import Chroma
+from langchain.chains import RetrievalQA
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from ibm_watsonx_ai.metanames import EmbedTextParamsMetaNames
+
+# ============================================
+# 1. Load PDF Document
+# ============================================
+loader = PyPDFLoader("your_document.pdf")  # Replace with your PDF path
+documents = loader.load()
+
+# ============================================
+# 2. Split into Chunks
+# ============================================
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50
+)
+chunks = text_splitter.split_documents(documents)
+
+# ============================================
+# 3. Configure Embedding Model (Task 3)
+# ============================================
+embed_params = {
+    EmbedTextParamsMetaNames.TRUNCATE_INPUT_TOKENS: 512
+}
+
+watsonx_embedding = WatsonxEmbeddings(
+    model_id="ibm/slate-125m-english-rtrvr-v2",
+    url="https://us-south.ml.cloud.ibm.com",
+    project_id="YOUR_PROJECT_ID",  # Replace with your project ID
+    params=embed_params
+)
+
+# ============================================
+# 4. Create Vector Database (Task 4)
+# ============================================
+vectordb = Chroma.from_documents(
+    documents=chunks,
+    embedding=watsonx_embedding
+)
+
+# ============================================
+# 5. Create Retriever (Task 5)
+# ============================================
+retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+
+# ============================================
+# 6. Initialize LLM (mistralai/mixtral)
+# ============================================
+llm = WatsonxLLM(
+    model_id="mistralai/mixtral-8x7b-instruct-v0.1",
+    url="https://us-south.ml.cloud.ibm.com",
+    project_id="YOUR_PROJECT_ID",
+    params={
+        "temperature": 0.7,
+        "max_new_tokens": 512
+    }
+)
+
+# ============================================
+# 7. Create RetrievalQA Chain
+# ============================================
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=retriever,
+    return_source_documents=False
+)
+
+# ============================================
+# 8. Gradio Interface
+# ============================================
+def answer_question(question, file):
+    if file is not None:
+        # If a new PDF is uploaded, reload and rebuild
+        loader = PyPDFLoader(file.name)
+        docs = loader.load()
+        splits = text_splitter.split_documents(docs)
+        new_vectordb = Chroma.from_documents(documents=splits, embedding=watsonx_embedding)
+        new_retriever = new_vectordb.as_retriever(search_kwargs={"k": 3})
+        new_qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=new_retriever)
+        result = new_qa.invoke(question)
+    else:
+        result = qa_chain.invoke(question)
+    
+    return result["result"]
+
+with gr.Blocks(title="Quest Analytics - AI RAG Assistant") as demo:
+    gr.Markdown("""
+    # 📚 Quest Analytics - AI RAG Assistant
+    *Upload a research paper and ask questions about its content*
+    """)
+    
+    with gr.Row():
+        with gr.Column():
+            file_input = gr.File(label="📄 Upload PDF Document", type="file")
+            question_input = gr.Textbox(
+                label="❓ Ask a question about the paper",
+                placeholder="e.g., What this paper is talking about?",
+                lines=3
+            )
+            submit_btn = gr.Button("🔍 Get Answer", variant="primary")
+        
+        with gr.Column():
+            answer_output = gr.Textbox(
+                label="💡 Answer",
+                lines=10,
+                interactive=False
+            )
+    
+    # Example query
+    gr.Examples(
+        examples=["What this paper is talking about?", 
+                  "What are the main findings?",
+                  "What methods were used?"],
+        inputs=question_input
+    )
+    
+    submit_btn.click(
+        fn=answer_question,
+        inputs=[question_input, file_input],
+        outputs=answer_output
+    )
+
+# ============================================
+# 9. Launch the Interface
+# ============================================
+if __name__ == "__main__":
+    demo.launch(share=True)  # share=True creates a public link

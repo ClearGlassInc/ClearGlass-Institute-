@@ -1,0 +1,411 @@
+/* ============================================================================
+   CLEARGLASS // CONTROL SURFACE v3.0
+   One integrated navigation system: sticky desktop bar · command palette ·
+   right-side systems drawer · mobile bottom rail.
+   Layered on top of the SENTINEL design tokens (console.css). Namespaced .cs-*.
+
+   Principles
+     · Minimal, high-precision, operational — not decorative sci-fi.
+     · Programmable glass: status drives a single --cs-accent custom property.
+     · Spring-based motion that reads mechanical (crisp, micro-overshoot).
+     · Keyboard-first, visible focus, ARIA-modal correct, reduced-motion safe.
+   ----------------------------------------------------------------------------
+   Sections
+     1.  Surface tokens (status palette + materials + spring)
+     2.  Status primitives (dot, pill)
+     3.  Sticky desktop bar
+     4.  Command palette (modal + combobox/listbox)
+     5.  Systems drawer (modal complementary)
+     6.  Mobile bottom rail
+     7.  Focus, motion, responsive
+   ========================================================================== */
+
+/* ------------------------------------------------ 1. SURFACE TOKENS */
+:root {
+  /* Four operational states — strong-contrast on the void background. */
+  --st-nominal:  var(--green);
+  --st-syncing:  var(--cyan);
+  --st-degraded: var(--amber);
+  --st-failure:  var(--danger);
+
+  /* Programmable glass: the active accent is set per-context in JS/CSS,
+     so one material recolours to the current state without new rules. */
+  --cs-accent:        var(--st-nominal);
+  --cs-accent-rgb:    47, 224, 138;
+
+  --cs-surface:       rgba(9, 14, 24, 0.72);
+  --cs-surface-solid: #080d17;
+  --cs-stroke:        rgba(120, 180, 220, 0.16);
+  --cs-stroke-hi:     rgba(var(--cs-accent-rgb), 0.55);
+  --cs-blur:          18px;
+  --cs-scrim:         rgba(3, 5, 10, 0.62);
+
+  /* Mechanical spring: a small, fast overshoot — feels like a detent, not a
+     bounce. Reduced-motion neutralises it below. */
+  --cs-spring:  cubic-bezier(.16, 1.12, .26, 1);
+  --cs-snap:    cubic-bezier(.22, 1, .30, 1);
+  --cs-bar-h:   60px;
+  --cs-rail-h:  62px;
+  --cs-z-bar:   60;
+  --cs-z-rail:  61;
+  --cs-z-scrim: 80;
+  --cs-z-modal: 90;
+
+  /* Focus ring — one definition, reused everywhere for predictability. */
+  --cs-focus: 0 0 0 2px var(--bg-void), 0 0 0 4px var(--cs-accent);
+}
+
+/* Status → accent binding. Any subtree can set data-state to recolour glass. */
+[data-state="NOMINAL"]  { --cs-accent: var(--st-nominal);  --cs-accent-rgb: 47, 224, 138; }
+[data-state="SYNCING"]  { --cs-accent: var(--st-syncing);  --cs-accent-rgb: 52, 227, 234; }
+[data-state="DEGRADED"] { --cs-accent: var(--st-degraded); --cs-accent-rgb: 255, 180, 84; }
+[data-state="FAILURE"]  { --cs-accent: var(--st-failure);  --cs-accent-rgb: 255, 77, 94; }
+
+/* ------------------------------------------------ 2. STATUS PRIMITIVES */
+.cs-dot {
+  --d: 8px;
+  width: var(--d); height: var(--d);
+  border-radius: 50%;
+  background: var(--cs-accent);
+  position: relative;
+  flex: none;
+  box-shadow: 0 0 0 0 rgba(var(--cs-accent-rgb), 0.55);
+}
+.cs-dot--pulse::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: var(--cs-accent);
+  animation: cs-ping 1.8s var(--cs-snap) infinite;
+}
+@keyframes cs-ping {
+  0%   { transform: scale(1);   opacity: .55; }
+  70%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+/* SYNCING gets an indeterminate sweep so motion communicates "in progress". */
+[data-state="SYNCING"] .cs-dot--pulse::after { animation-duration: 1.1s; }
+
+.cs-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(var(--cs-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--cs-accent-rgb), 0.34);
+  color: var(--cs-accent);
+  font: 600 0.72rem/1 var(--font-mono);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------ 3. STICKY DESKTOP BAR */
+.cs-bar {
+  position: sticky; top: 0; z-index: var(--cs-z-bar);
+  height: var(--cs-bar-h);
+  background: var(--cs-surface);
+  -webkit-backdrop-filter: blur(var(--cs-blur)) saturate(140%);
+  backdrop-filter: blur(var(--cs-blur)) saturate(140%);
+  border-bottom: 1px solid var(--cs-stroke);
+  transition: border-color var(--t-mid) var(--cs-snap),
+              box-shadow var(--t-mid) var(--cs-snap);
+}
+/* Hairline of live status colour along the bar's base — the calmest possible
+   global signal. Brightens as the surface scrolls (set via .is-stuck in JS). */
+.cs-bar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--cs-accent-rgb), .7), transparent);
+  opacity: .45; transition: opacity var(--t-mid) var(--cs-snap);
+}
+.cs-bar.is-stuck { box-shadow: 0 18px 40px -30px rgba(0,0,0,.9); }
+.cs-bar.is-stuck::after { opacity: .9; }
+
+.cs-bar__inner {
+  max-width: var(--maxw); height: 100%; margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex; align-items: center; gap: 18px;
+}
+
+.cs-brand { display: inline-flex; align-items: center; gap: 10px; flex: none; }
+.cs-brand__mark { width: 26px; height: 26px; }
+.cs-brand__name {
+  font: 700 0.92rem/1 var(--font-display); letter-spacing: .06em;
+  color: var(--text-hi);
+}
+.cs-brand__name b { color: var(--cyan); font-weight: 700; }
+.cs-brand__sub {
+  display: block; font: 500 0.6rem/1 var(--font-mono);
+  letter-spacing: .22em; color: var(--text-dim); margin-top: 4px;
+}
+
+.cs-nav { display: flex; align-items: center; gap: 2px; margin-left: 6px; }
+.cs-nav a {
+  position: relative;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  font: 500 0.86rem/1 var(--font-body); color: var(--text);
+  transition: color var(--t-fast) var(--cs-snap),
+              background var(--t-fast) var(--cs-snap);
+}
+.cs-nav a:hover { color: var(--text-hi); background: rgba(120,180,220,.06); }
+.cs-nav a[aria-current="true"] { color: var(--text-hi); }
+.cs-nav a[aria-current="true"]::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 3px;
+  height: 2px; border-radius: 2px; background: var(--cyan);
+  box-shadow: 0 0 10px -1px var(--cyan);
+}
+
+.cs-spacer { margin-left: auto; }
+
+/* Command-palette trigger — looks like an input, behaves as a button. */
+.cs-cmdk {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 36px; padding: 0 10px 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-fill-2);
+  border: 1px solid var(--cs-stroke);
+  color: var(--text-dim); cursor: pointer;
+  font: 500 0.8rem/1 var(--font-body);
+  transition: border-color var(--t-fast) var(--cs-snap),
+              color var(--t-fast) var(--cs-snap),
+              background var(--t-fast) var(--cs-snap);
+}
+.cs-cmdk:hover { color: var(--text-hi); border-color: var(--glass-stroke-hi); background: var(--bg-elevated); }
+.cs-cmdk svg { width: 15px; height: 15px; opacity: .8; }
+.cs-cmdk__hint { margin-left: 4px; }
+.cs-kbd {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 3px 6px; border-radius: 6px;
+  background: rgba(120,180,220,.08); border: 1px solid var(--cs-stroke);
+  font: 600 0.68rem/1 var(--font-mono); color: var(--text);
+}
+
+/* Generic icon control (status readout, drawer toggle). */
+.cs-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; min-width: 36px; padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-fill-2); border: 1px solid var(--cs-stroke);
+  color: var(--text); cursor: pointer;
+  transition: border-color var(--t-fast) var(--cs-snap),
+              background var(--t-fast) var(--cs-snap),
+              transform var(--t-fast) var(--cs-spring);
+}
+.cs-iconbtn:hover { border-color: var(--glass-stroke-hi); background: var(--bg-elevated); }
+.cs-iconbtn:active { transform: translateY(1px); }
+.cs-iconbtn svg { width: 17px; height: 17px; }
+
+/* Global status readout in the bar — a button that opens the drawer. */
+.cs-status {
+  border-color: rgba(var(--cs-accent-rgb), 0.36);
+}
+.cs-status__label {
+  font: 600 0.72rem/1 var(--font-mono); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--cs-accent);
+}
+.cs-status__clock {
+  font: 500 0.7rem/1 var(--font-mono); color: var(--text-dim);
+  letter-spacing: .04em;
+}
+
+/* ------------------------------------------------ 4. COMMAND PALETTE */
+.cs-palette[hidden] { display: none; }
+.cs-palette {
+  position: fixed; inset: 0; z-index: var(--cs-z-modal);
+  display: grid; place-items: start center;
+  padding: clamp(60px, 12vh, 160px) 16px 16px;
+  background: var(--cs-scrim);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.cs-palette__panel {
+  width: min(640px, 100%);
+  background: var(--cs-surface-solid);
+  border: 1px solid var(--glass-stroke-hi);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel), 0 0 0 1px rgba(var(--cs-accent-rgb), .12);
+  overflow: hidden;
+  transform-origin: top center;
+  animation: cs-pop var(--t-mid) var(--cs-spring) both;
+}
+@keyframes cs-pop {
+  from { opacity: 0; transform: translateY(-8px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.cs-palette__search {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px; border-bottom: 1px solid var(--cs-stroke);
+}
+.cs-palette__search svg { width: 18px; height: 18px; color: var(--text-dim); flex: none; }
+.cs-palette__input {
+  flex: 1; background: none; border: 0; outline: none;
+  font: 500 1.02rem/1.2 var(--font-body); color: var(--text-hi);
+}
+.cs-palette__input::placeholder { color: var(--text-faint); }
+.cs-palette__list { list-style: none; max-height: min(52vh, 440px); overflow-y: auto; padding: 8px; }
+.cs-palette__group {
+  padding: 12px 12px 6px; font: 600 0.66rem/1 var(--font-mono);
+  letter-spacing: .16em; text-transform: uppercase; color: var(--text-faint);
+}
+.cs-opt {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text);
+  border: 1px solid transparent;
+}
+.cs-opt__icon {
+  width: 30px; height: 30px; flex: none; display: grid; place-items: center;
+  border-radius: 8px; background: rgba(120,180,220,.06);
+  border: 1px solid var(--cs-stroke); color: var(--cyan);
+}
+.cs-opt__icon svg { width: 16px; height: 16px; }
+.cs-opt__body { min-width: 0; }
+.cs-opt__title { font: 500 0.9rem/1.2 var(--font-body); color: var(--text-hi); }
+.cs-opt__hint { font: 500 0.74rem/1.2 var(--font-body); color: var(--text-dim); margin-top: 2px; }
+.cs-opt__key { margin-left: auto; }
+/* aria-selected drives the active row — keyboard and pointer share one truth. */
+.cs-opt[aria-selected="true"] {
+  background: rgba(var(--cs-accent-rgb), .10);
+  border-color: rgba(var(--cs-accent-rgb), .42);
+}
+.cs-opt[aria-selected="true"] .cs-opt__icon { color: var(--cs-accent); border-color: rgba(var(--cs-accent-rgb), .4); }
+.cs-palette__empty { padding: 28px 16px; text-align: center; color: var(--text-dim); font-size: .9rem; }
+.cs-palette__foot {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 10px 16px; border-top: 1px solid var(--cs-stroke);
+  font: 500 0.72rem/1 var(--font-body); color: var(--text-dim);
+}
+.cs-palette__foot .cs-kbd { font-size: .64rem; }
+
+/* ------------------------------------------------ 5. SYSTEMS DRAWER */
+.cs-scrim[hidden] { display: none; }
+.cs-scrim {
+  position: fixed; inset: 0; z-index: var(--cs-z-scrim);
+  background: var(--cs-scrim);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  animation: cs-fade var(--t-mid) var(--cs-snap) both;
+}
+@keyframes cs-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.cs-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: var(--cs-z-modal);
+  width: min(420px, 100%);
+  background: var(--cs-surface-solid);
+  border-left: 1px solid var(--glass-stroke-hi);
+  box-shadow: -30px 0 80px -40px rgba(0,0,0,.9);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--t-mid) var(--cs-spring);
+}
+.cs-drawer[hidden] { display: none; }
+.cs-drawer.is-open { transform: none; }
+
+.cs-drawer__head {
+  padding: 18px 20px; border-bottom: 1px solid var(--cs-stroke);
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(180deg, rgba(var(--cs-accent-rgb), .06), transparent);
+}
+.cs-drawer__title { font: 600 0.96rem/1.2 var(--font-display); color: var(--text-hi); letter-spacing: .02em; }
+.cs-drawer__sub { font: 500 0.7rem/1 var(--font-mono); color: var(--text-dim); letter-spacing: .1em; margin-top: 4px; }
+.cs-drawer__close { margin-left: auto; }
+.cs-drawer__body { padding: 14px 16px 20px; overflow-y: auto; flex: 1; }
+.cs-drawer__meta {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 4px 12px; font: 500 0.72rem/1 var(--font-mono); color: var(--text-dim);
+}
+
+/* One system row — the glass recolours to its own state via data-state. */
+.cs-sys {
+  border: 1px solid var(--cs-stroke); border-radius: var(--radius-sm);
+  background: var(--glass-fill-2);
+  padding: 14px; margin-bottom: 10px;
+  border-left: 2px solid rgba(var(--cs-accent-rgb), .7);
+  transition: border-color var(--t-mid) var(--cs-snap);
+}
+.cs-sys__top { display: flex; align-items: center; gap: 10px; }
+.cs-sys__name { font: 600 0.88rem/1.2 var(--font-body); color: var(--text-hi); }
+.cs-sys__pill { margin-left: auto; }
+.cs-sys__detail { font: 500 0.76rem/1.4 var(--font-body); color: var(--text-dim); margin-top: 8px; }
+.cs-sys__detail b { color: var(--text); font-weight: 600; }
+/* Contextual controls — only rendered when the state warrants them. */
+.cs-sys__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.cs-sys__actions:empty { display: none; }
+.cs-act {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 11px; border-radius: var(--radius-sm);
+  background: rgba(120,180,220,.05); border: 1px solid var(--cs-stroke);
+  color: var(--text); cursor: pointer;
+  font: 600 0.74rem/1 var(--font-body);
+  transition: border-color var(--t-fast) var(--cs-snap), background var(--t-fast) var(--cs-snap),
+              transform var(--t-fast) var(--cs-spring);
+}
+.cs-act:hover { border-color: var(--glass-stroke-hi); background: var(--bg-elevated); color: var(--text-hi); }
+.cs-act:active { transform: translateY(1px); }
+.cs-act--primary { background: rgba(var(--cs-accent-rgb), .12); border-color: rgba(var(--cs-accent-rgb), .45); color: var(--cs-accent); }
+.cs-act svg { width: 14px; height: 14px; }
+
+/* ------------------------------------------------ 6. MOBILE BOTTOM RAIL */
+.cs-rail {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--cs-z-rail);
+  display: none;
+  height: calc(var(--cs-rail-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--cs-surface);
+  -webkit-backdrop-filter: blur(var(--cs-blur)) saturate(140%);
+  backdrop-filter: blur(var(--cs-blur)) saturate(140%);
+  border-top: 1px solid var(--cs-stroke);
+}
+.cs-rail__inner { display: flex; height: var(--cs-rail-h); }
+.cs-rail__btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--text-dim); font: 600 0.62rem/1 var(--font-mono);
+  letter-spacing: .06em; text-transform: uppercase;
+  position: relative; transition: color var(--t-fast) var(--cs-snap);
+}
+.cs-rail__btn svg { width: 20px; height: 20px; }
+.cs-rail__btn:hover, .cs-rail__btn[aria-current="true"] { color: var(--text-hi); }
+.cs-rail__btn[aria-current="true"]::before {
+  content: ""; position: absolute; top: 0; left: 26%; right: 26%; height: 2px;
+  background: var(--cyan); border-radius: 2px; box-shadow: 0 0 10px -1px var(--cyan);
+}
+/* The rail's status node mirrors the global accent. */
+.cs-rail__btn--status { color: var(--cs-accent); }
+.cs-rail__btn--status .cs-dot { --d: 9px; }
+
+/* ------------------------------------------------ 7. FOCUS / MOTION / RESPONSIVE */
+/* Visible, consistent focus for keyboard users across every interactive node. */
+.cs-bar a:focus-visible,
+.cs-nav a:focus-visible,
+.cs-cmdk:focus-visible,
+.cs-iconbtn:focus-visible,
+.cs-opt:focus-visible,
+.cs-act:focus-visible,
+.cs-rail__btn:focus-visible,
+.cs-palette__input:focus-visible {
+  outline: none; box-shadow: var(--cs-focus); border-radius: var(--radius-sm);
+}
+.cs-palette__input:focus-visible { box-shadow: none; } /* the panel carries focus affordance */
+
+/* Lock background scroll while a modal owns the viewport. */
+html.cs-modal-open, body.cs-modal-open { overflow: hidden; }
+
+@media (max-width: 860px) {
+  .cs-nav, .cs-cmdk__hint, .cs-status__clock { display: none; }
+  .cs-brand__sub { display: none; }
+  .cs-rail { display: block; }
+  /* Keep the fixed rail from covering the footer / last content. */
+  body { padding-bottom: calc(var(--cs-rail-h) + env(safe-area-inset-bottom, 0px)); }
+  .cs-drawer { width: 100%; }
+}
+
+/* Reduced motion: strip springs, overshoot, sweeps — state still fully legible
+   through colour, text, and the static dot. Nothing is animated. */
+@media (prefers-reduced-motion: reduce) {
+  .cs-bar, .cs-drawer, .cs-iconbtn, .cs-act, .cs-nav a, .cs-cmdk { transition: none; }
+  .cs-palette__panel { animation: none; }
+  .cs-scrim { animation: none; }
+  .cs-dot--pulse::after { animation: none; display: none; }
+}
+:root.cs-no-motion .cs-drawer,
+:root.cs-no-motion .cs-bar,
+:root.cs-no-motion .cs-iconbtn,
+:root.cs-no-motion .cs-act { transition: none !important; }
+:root.cs-no-motion .cs-palette__panel,
+:root.cs-no-motion .cs-dot--pulse::after,
+:root.cs-no-motion .cs-scrim { animation: none !important; }

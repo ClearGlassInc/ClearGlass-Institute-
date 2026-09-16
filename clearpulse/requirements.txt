@@ -1,0 +1,19 @@
+# ClearPulse - Triage & Compliance Pipeline
+# Copyright (c) 2025-2030 Clearglassinc. All Rights Reserved.
+#
+# The core engine (ingestion, engine, compliance, alerts, pipeline) depends only
+# on the Python standard library plus PyYAML for tunable rules. The FastAPI
+# gateway adds the web stack below. Tests run on the stdlib alone.
+
+# Tunable risk rules (engine falls back to built-in defaults if absent).
+PyYAML>=6.0.3
+
+# Orchestration gateway (clearpulse/backend/app.py) only.
+fastapi>=0.141.1
+pydantic>=2.13.4
+uvicorn>=0.52.3
+
+# Optional production runtime (uncomment as the deployment matures):
+# redis>=5.0.0           # stream:tx:* / stream:access / stream:alerts
+# psycopg[binary]>=3.1   # PostgreSQL source of truth for the dashboard
+# pyarrow>=15.0.0        # append-only Parquet ledger on the data lake

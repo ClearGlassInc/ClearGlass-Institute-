@@ -1,0 +1,21 @@
+{
+  "candidate_name": "Dezzy",
+  "headline": "Business Development & Operations Leader (Crypto / Fintech)",
+  "candidate_summary": "Entrepreneurial BD and operations leader with a track record of closing partnerships, scaling revenue, and standing up new lines of business in crypto and fintech.",
+  "role_keywords": ["business development", "strategy", "operations", "partnerships", "bizdev", "growth", "revenue"],
+  "industry_keywords": ["crypto", "fintech", "web3", "blockchain", "defi", "digital assets"],
+  "bonus_keywords": ["licensing", "regulatory", "entrepreneur", "founder", "go-to-market", "gtm", "stablecoin", "payments"],
+  "salary_floor": 100000,
+  "require_remote": false,
+  "min_score": 7.0,
+  "daily_top_n": 10,
+  "follow_up_days": 4,
+  "weights": {
+    "role_match": 3.5,
+    "industry_match": 3.0,
+    "salary": 2.0,
+    "remote": 1.0,
+    "bonus": 1.5,
+    "freshness": 1.0
+  }
+}

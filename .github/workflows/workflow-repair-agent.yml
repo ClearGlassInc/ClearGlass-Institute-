@@ -1,0 +1,119 @@
+name: Workflow Repair Agent
+
+# Autonomous GitHub Workflow Repair & Execution Agent.
+# Policy: .github/WORKFLOW_AGENT.md
+#
+# Two stages:
+#   * audit  - deterministic, read-only, runs on schedule AND every dispatch.
+#              Fails the run on any security-baseline violation (no LLM needed).
+#   * repair - LLM-driven fixes + auto-PR. Gated behind manual dispatch with the
+#              `autofix` input AND the presence of the ANTHROPIC_API_KEY secret,
+#              so it never runs unattended and never breaks scheduled CI.
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC - weekly drift check
+  workflow_dispatch:
+    inputs:
+      autofix:
+        description: "Run the LLM repair agent and open a PR with any fixes"
+        type: boolean
+        default: false
+
+# Least privilege: read-only by default; the repair job elevates only what
+# create-pull-request needs, and only when it actually runs.
+permissions:
+  contents: read
+
+concurrency:
+  group: workflow-repair-agent-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: audit-workflows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install auditor dependencies
+        run: pip install --disable-pip-version-check pyyaml
+
+      - name: Audit workflows (deterministic, read-only)
+        run: python .github/scripts/audit_workflows.py
+
+  repair:
+    name: llm-repair-and-pr
+    needs: audit
+    # Only on a manual dispatch that explicitly opts into autofix. `always()`
+    # lets repair run even if audit reported findings (that is the point).
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.autofix }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Guard - require ANTHROPIC_API_KEY secret
+        id: guard
+        env:
+          HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: |
+          set -euo pipefail
+          if [ "${HAS_KEY}" != "true" ]; then
+            echo "ANTHROPIC_API_KEY is not set; skipping LLM repair (no error)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Claude Code repair agent
+        if: steps.guard.outputs.enabled == 'true'
+        # anthropics/claude-code-action v1
+        uses: anthropics/claude-code-action@fa2b2666b747000bf42767d1f332065b375e3c8f
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Follow the repository policy in .github/WORKFLOW_AGENT.md exactly.
+            Inspect every file in .github/workflows/ and the composite/reusable
+            workflows they call. Repair issues in the documented priority order
+            (parse errors, broken/mutable action refs, permission scope, missing
+            files/commands, cache/dependency inefficiencies, security, then
+            maintainability). Keep diffs minimal. Do NOT modify application code.
+            Never weaken security, never use mutable action refs, never print
+            secrets. After editing, leave the working tree changes for the PR
+            step to commit - do not push or open a PR yourself.
+          claude_args: |
+            --model claude-opus-4-8
+            --max-turns 12
+
+      - name: Open pull request with any fixes
+        if: steps.guard.outputs.enabled == 'true'
+        # peter-evans/create-pull-request v8.1.1
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          branch: automation/workflow-repair
+          commit-message: "fix(ci): repair GitHub workflows and validation"
+          title: "fix(ci): automated workflow repair"
+          body: |
+            Automated repair produced by the Workflow Repair Agent.
+
+            Policy: `.github/WORKFLOW_AGENT.md`
+            Validation: `.github/scripts/audit_workflows.py` (run it on this branch).
+            Rollback: close/revert this PR - the base branch is unchanged.
+
+            No secrets are printed; only `.github/workflows/` should be touched.
+          labels: |
+            automation
+            ci
+          delete-branch: true

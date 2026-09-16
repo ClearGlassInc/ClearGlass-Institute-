@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Head of Business Development",
+    "company": "Figure",
+    "url": "https://boards.greenhouse.io/figure/jobs/1",
+    "description": "Own partnerships and revenue for our crypto lending platform. Lead go-to-market, licensing, and strategic deals with banks and fintechs.",
+    "location": "Remote (US)",
+    "remote": true,
+    "salary_min": 160000,
+    "salary_max": 210000,
+    "source": "greenhouse",
+    "posted_date": "2026-06-15",
+    "contact_name": "Dana"
+  },
+  {
+    "title": "Director of Strategy & Operations",
+    "company": "Block",
+    "url": "https://block.xyz/careers/2",
+    "description": "Drive operations and strategy across our fintech and bitcoin business units. Partnerships and revenue ownership a plus.",
+    "location": "Remote",
+    "remote": true,
+    "salary": "$150k-$190k",
+    "source": "cryptojobslist",
+    "posted_date": "2026-06-14"
+  },
+  {
+    "title": "Partnerships Lead, Web3",
+    "company": "Alpaca",
+    "url": "https://alpaca.markets/jobs/3",
+    "description": "Build the web3 partner ecosystem. GTM, BD, and revenue ownership across exchanges and wallets.",
+    "location": "Hybrid - NYC",
+    "remote": false,
+    "salary_min": 130000,
+    "salary_max": 170000,
+    "source": "remote100k",
+    "posted_date": "2026-06-12"
+  },
+  {
+    "title": "Junior Marketing Coordinator",
+    "company": "Acme Retail",
+    "url": "https://acme.com/jobs/4",
+    "description": "Social media and email marketing for a consumer retail brand.",
+    "location": "On-site",
+    "remote": false,
+    "salary_min": 55000,
+    "salary_max": 65000,
+    "source": "indeed",
+    "posted_date": "2026-06-15"
+  }
+]

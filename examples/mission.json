@@ -1,0 +1,35 @@
+{
+  "mission": "ClearGlass enterprise automation launch",
+  "tasks": [
+    {
+      "id": "web-surface",
+      "title": "Keep ClearGlass website connected to Opal-Koboi",
+      "owner": "ClearGlass Inc.",
+      "impact": 92,
+      "urgency": 84,
+      "confidence": 91,
+      "effort": 24,
+      "status": "ready"
+    },
+    {
+      "id": "automation-core",
+      "title": "Deploy enterprise orchestration core",
+      "owner": "ClearGlass Inc.",
+      "impact": 98,
+      "urgency": 86,
+      "confidence": 78,
+      "effort": 52,
+      "status": "ready"
+    },
+    {
+      "id": "audit-ledger",
+      "title": "Enable audit logging and workflow evidence records",
+      "owner": "ClearGlass Inc.",
+      "impact": 88,
+      "urgency": 76,
+      "confidence": 86,
+      "effort": 38,
+      "status": "ready"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+name: Repo Assistant Bot
+
+on:
+  issues:
+    types: [opened]
+
+# Least privilege: default every scope to read-only at the top level, then
+# grant only the elevated scope the job actually needs (issues: write).
+permissions:
+  contents: read
+
+jobs:
+  greet-and-label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Greet user and enforce triage label
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+
+            // Ensure triage label exists in this repository
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: 'triage' });
+            } catch (error) {
+              if (error.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: 'triage',
+                  color: 'D4C5F9',
+                  description: 'New issue pending triage review'
+                });
+              } else {
+                throw error;
+              }
+            }
+
+            // Post a welcome comment
+            await github.rest.issues.createComment({
+              issue_number,
+              owner,
+              repo,
+              body: "👋 Hello there! Thank you for opening this issue. Our automated bot has labeled it for triage, and our team will review it shortly."
+            });
+
+            // Add triage label to the issue
+            await github.rest.issues.addLabels({
+              issue_number,
+              owner,
+              repo,
+              labels: ['triage']
+            });

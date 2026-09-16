@@ -1,0 +1,757 @@
+openapi: 3.0.3
+info:
+  title: Clearglassinc Aerospace Intelligence API
+  description: |
+    Enterprise-grade REST API for aerospace market intelligence, predictive analytics, and company data aggregation.
+    
+    **Features:**
+    - Real-time company data scraping from multiple sources
+    - Predictive analytics and ML models
+    - Comprehensive market intelligence
+    - Historical data analysis
+    - Funding and patent tracking
+    
+    **Authentication:** Bearer token (JWT)
+  version: 2.0.0
+  contact:
+    name: Clearglassinc API Support
+    email: api-support@clearglassinc.com
+    url: https://docs.clearglassinc.com
+  license:
+    name: Proprietary
+    url: https://clearglassinc.com/license
+
+servers:
+  - url: https://api.clearglassinc.com/v2
+    description: Production server
+  - url: https://api-staging.clearglassinc.com/v2
+    description: Staging server
+  - url: http://localhost:8080/v2
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Companies
+    description: Company data management and scraping
+  - name: Predictions
+    description: Predictive analytics and forecasting
+  - name: Metrics
+    description: Company metrics and time series data
+  - name: Funding
+    description: Funding rounds and investor data
+  - name: Patents
+    description: Patent and innovation tracking
+  - name: News
+    description: News articles and sentiment analysis
+  - name: Analytics
+    description: Advanced analytics and reporting
+
+paths:
+  /companies:
+    get:
+      tags:
+        - Companies
+      summary: List all aerospace companies
+      description: Retrieve paginated list of aerospace companies with optional filtering
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: industry
+          in: query
+          schema:
+            type: string
+          description: Filter by industry sector
+        - name: headquarters
+          in: query
+          schema:
+            type: string
+          description: Filter by headquarters location
+        - name: minEmployees
+          in: query
+          schema:
+            type: integer
+          description: Minimum employee count
+        - name: fundingStage
+          in: query
+          schema:
+            type: string
+            enum: [Seed, SeriesA, SeriesB, SeriesC, SeriesD, IPO]
+          description: Filter by funding stage
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  companies:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Company'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    
+    post:
+      tags:
+        - Companies
+      summary: Add new company
+      description: Manually add a company to the database or trigger scraping
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyInput'
+      responses:
+        '201':
+          description: Company created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  
+  /companies/{companyId}:
+    get:
+      tags:
+        - Companies
+      summary: Get company by ID
+      description: Retrieve detailed information about a specific company
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdParam'
+        - name: include
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [metrics, funding, patents, news, predictions]
+          description: Include related data
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyDetailed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags:
+        - Companies
+      summary: Update company
+      description: Update company information
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyInput'
+      responses:
+        '200':
+          description: Company updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+    
+    delete:
+      tags:
+        - Companies
+      summary: Delete company
+      description: Soft delete a company (marks as inactive)
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdParam'
+      responses:
+        '204':
+          description: Company deleted successfully
+
+  /companies/{companyId}/scrape:
+    post:
+      tags:
+        - Companies
+      summary: Trigger company data scraping
+      description: Initiate scraping job for a specific company across all configured sources
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdParam'
+        - name: sources
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [LinkedIn, Crunchbase, SEC_Edgar, SpaceNews, Patents]
+          description: Specific sources to scrape (default: all)
+        - name: forceRefresh
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Force refresh even if recently scraped
+      responses:
+        '202':
+          description: Scraping job initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [queued, running]
+                  estimatedCompletionTime:
+                    type: string
+                    format: date-time
+
+  /predictions:
+    get:
+      tags:
+        - Predictions
+      summary: List predictions
+      description: Retrieve predictions with optional filtering
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: predictionType
+          in: query
+          schema:
+            type: string
+            enum: [GrowthTrajectory, FundingProbability, MarketPosition, Innovation]
+        - name: minConfidence
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 1
+          description: Minimum confidence threshold
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prediction'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    
+    post:
+      tags:
+        - Predictions
+      summary: Generate prediction
+      description: Run ML models to generate predictions for a company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - companyId
+                - predictionType
+              properties:
+                companyId:
+                  type: string
+                  format: uuid
+                predictionType:
+                  type: string
+                  enum: [GrowthTrajectory, FundingProbability, MarketPosition, TalentAcquisition, Innovation]
+                horizon:
+                  type: integer
+                  description: Prediction horizon in days
+                  default: 365
+      responses:
+        '201':
+          description: Prediction generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prediction'
+
+  /companies/{companyId}/metrics:
+    get:
+      tags:
+        - Metrics
+      summary: Get company metrics
+      description: Retrieve time series metrics for a company
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdParam'
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: daily
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  companyId:
+                    type: string
+                    format: uuid
+                  metrics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Metric'
+
+  /funding/rounds:
+    get:
+      tags:
+        - Funding
+      summary: List funding rounds
+      description: Retrieve funding rounds with filtering
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: roundType
+          in: query
+          schema:
+            type: string
+        - name: minAmount
+          in: query
+          schema:
+            type: number
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fundingRounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FundingRound'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /patents:
+    get:
+      tags:
+        - Patents
+      summary: Search patents
+      description: Search patent database with filtering
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: filingDateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Pending, Granted, Expired]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Patent'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /analytics/market-overview:
+    get:
+      tags:
+        - Analytics
+      summary: Get market overview
+      description: Generate comprehensive market intelligence report
+      parameters:
+        - name: sector
+          in: query
+          schema:
+            type: string
+          description: Filter by aerospace sector
+        - name: timeframe
+          in: query
+          schema:
+            type: string
+            enum: [30d, 90d, 1y, 5y]
+            default: 90d
+      responses:
+        '200':
+          description: Market overview report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketOverview'
+
+  /analytics/reports:
+    post:
+      tags:
+        - Analytics
+      summary: Generate custom report
+      description: Create customized market intelligence report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reportType
+                - companyIds
+              properties:
+                reportType:
+                  type: string
+                  enum: [comprehensive, competitive_analysis, growth_trends, funding_landscape]
+                companyIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                includePredictions:
+                  type: boolean
+                  default: true
+                format:
+                  type: string
+                  enum: [json, csv, excel, pdf]
+                  default: json
+      responses:
+        '202':
+          description: Report generation initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reportId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [processing]
+                  downloadUrl:
+                    type: string
+                    description: Will be available when status is 'completed'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CompanyIdParam:
+      name: companyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Unique company identifier
+    
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+    
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page
+
+  schemas:
+    Company:
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        linkedInUrl:
+          type: string
+        website:
+          type: string
+        industry:
+          type: string
+        headquarters:
+          type: string
+        employeeCount:
+          type: integer
+        companyType:
+          type: string
+        founded:
+          type: string
+          format: date
+        fundingStage:
+          type: string
+        totalFunding:
+          type: number
+        valuation:
+          type: number
+        specialties:
+          type: array
+          items:
+            type: string
+        lastUpdated:
+          type: string
+          format: date-time
+    
+    CompanyDetailed:
+      allOf:
+        - $ref: '#/components/schemas/Company'
+        - type: object
+          properties:
+            metrics:
+              type: array
+              items:
+                $ref: '#/components/schemas/Metric'
+            fundingRounds:
+              type: array
+              items:
+                $ref: '#/components/schemas/FundingRound'
+            patents:
+              type: array
+              items:
+                $ref: '#/components/schemas/Patent'
+            predictions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Prediction'
+    
+    CompanyInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        linkedInUrl:
+          type: string
+        website:
+          type: string
+        industry:
+          type: string
+        headquarters:
+          type: string
+    
+    Metric:
+      type: object
+      properties:
+        metricId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        metricDate:
+          type: string
+          format: date
+        employeeCount:
+          type: integer
+        employeeGrowthRate:
+          type: number
+        estimatedRevenue:
+          type: number
+        jobPostings:
+          type: integer
+        patentFilings:
+          type: integer
+        newsArticles:
+          type: integer
+        marketSentiment:
+          type: number
+          minimum: -1
+          maximum: 1
+    
+    Prediction:
+      type: object
+      properties:
+        predictionId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        predictionType:
+          type: string
+        predictionDate:
+          type: string
+          format: date-time
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        predictions:
+          type: object
+          additionalProperties: true
+        modelUsed:
+          type: string
+    
+    FundingRound:
+      type: object
+      properties:
+        roundId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        roundType:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        announcedDate:
+          type: string
+          format: date
+        leadInvestor:
+          type: string
+        valuation:
+          type: number
+    
+    Patent:
+      type: object
+      properties:
+        patentId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        patentNumber:
+          type: string
+        title:
+          type: string
+        abstract:
+          type: string
+        filingDate:
+          type: string
+          format: date
+        grantDate:
+          type: string
+          format: date
+        status:
+          type: string
+    
+    MarketOverview:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        totalCompanies:
+          type: integer
+        topGrowingCompanies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+        fundingTrends:
+          type: object
+        innovationLeaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+    
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+    
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -1,0 +1,225 @@
+name: Node.js Package
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to GitHub Packages now"
+        type: boolean
+        default: false
+
+# Default to read-only at the top level. Publishing targets GitHub Packages
+# (npm.pkg.github.com) using the built-in GITHUB_TOKEN, so only the publish-npm
+# job elevates to `packages: write`. No external npm secret is required.
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Detect Node package
+        id: detect
+        shell: bash
+        run: |
+          if [ -f package.json ]; then
+            echo "has_package=true" >> "$GITHUB_OUTPUT"
+            echo "Node package detected."
+          else
+            echo "has_package=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json found. Build will be skipped cleanly."
+          fi
+
+      - name: Setup Node.js
+        if: steps.detect.outputs.has_package == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.detect.outputs.has_package == 'true'
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run tests when configured
+        if: steps.detect.outputs.has_package == 'true'
+        shell: bash
+        run: |
+          if npm run | grep -q " test"; then
+            npm test
+          else
+            echo "No npm test script found. Skipping tests."
+          fi
+
+      - name: Skip build when package.json is absent
+        if: steps.detect.outputs.has_package != 'true'
+        shell: bash
+        run: echo "Repository has no package.json. Nothing to build."
+
+  publish-npm:
+    name: publish-npm
+    needs: build
+    # Publishes on a GitHub Release, OR on a manual dispatch that explicitly
+    # opts in via the `publish` input. Manual dispatch requires repo write
+    # access to start, and either path still needs the NPM_TOKEN secret.
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Detect Node package
+        id: detect
+        shell: bash
+        run: |
+          if [ -f package.json ]; then
+            echo "has_package=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_package=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js for GitHub Packages
+        if: steps.detect.outputs.has_package == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@clearglassinc"
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.detect.outputs.has_package == 'true'
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Check whether this version is already published
+        id: version
+        if: steps.detect.outputs.has_package == 'true'
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "Target: ${NAME}@${VERSION} -> GitHub Packages"
+          # Re-dispatching the deploy must not fail just because the version is
+          # unchanged: npm returns 409 on republish. Detect it and skip cleanly.
+          if npm view "${NAME}@${VERSION}" version \
+               --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "::warning::${NAME}@${VERSION} is already on GitHub Packages; skipping publish (bump the version to ship a new release)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish package to GitHub Packages
+        if: steps.detect.outputs.has_package == 'true' && steps.version.outputs.should_publish == 'true'
+        # GITHUB_TOKEN is always present in Actions; packages: write (above)
+        # authorizes the push. Visibility follows the repository.
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip publish when package.json is absent
+        if: steps.detect.outputs.has_package != 'true'
+        shell: bash
+        run: echo "No package.json found. npm publish skipped."
+
+  publish-npmjs:
+    name: publish-npmjs
+    needs: build
+    # Public npmjs.org publish - self-arming: runs on the same triggers as
+    # publish-npm, but only actually publishes once the NPM_TOKEN secret
+    # exists. Until then it skips with a warning, so adding the secret is the
+    # ONLY step needed to go public (no workflow edits, no re-wiring).
+    if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Guard - require NPM_TOKEN
+        id: npmguard
+        shell: bash
+        env:
+          HAS_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          if [ "${HAS_TOKEN}" != "true" ] || [ ! -f package.json ]; then
+            echo "::warning::NPM_TOKEN not set (or no package.json); skipping public npmjs publish."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js for npmjs
+        if: steps.npmguard.outputs.enabled == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.npmguard.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Check whether this version is already published
+        id: version
+        if: steps.npmguard.outputs.enabled == 'true'
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          NAME="$(node -p "require('./package.json').name")"
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "Target: ${NAME}@${VERSION} -> registry.npmjs.org"
+          if npm view "${NAME}@${VERSION}" version \
+               --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
+            echo "::warning::${NAME}@${VERSION} is already on npmjs.org; skipping publish (bump the version to ship a new release)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish package to npmjs.org (public)
+        if: steps.npmguard.outputs.enabled == 'true' && steps.version.outputs.should_publish == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

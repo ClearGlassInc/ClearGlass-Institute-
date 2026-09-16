@@ -1,0 +1,244 @@
+version: 2.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ORBS
+# ─────────────────────────────────────────────────────────────────────────────
+orbs:
+  node: circleci/node@6.3.0
+  python: circleci/python@2.1.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EXECUTORS
+# ─────────────────────────────────────────────────────────────────────────────
+executors:
+  node22:
+    docker:
+      - image: cimg/node:22.19
+    resource_class: medium
+    working_directory: ~/project
+
+  python313:
+    docker:
+      - image: cimg/python:3.13
+    resource_class: medium
+    working_directory: ~/project
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COMMANDS
+# ─────────────────────────────────────────────────────────────────────────────
+commands:
+  # Install root-package dependencies (no external deps; still caches npm metadata)
+  install-root-deps:
+    steps:
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/.npm
+          override-ci-command: npm ci
+
+  # Install artemis-agent dependencies from its own lockfile
+  install-artemis-deps:
+    steps:
+      - node/install-packages:
+          app-dir: apps/artemis-agent
+          pkg-manager: npm
+          cache-path: ~/.npm
+          override-ci-command: npm ci
+
+  # Install pytest + optional extras, caching by a given key suffix
+  install-pytest:
+    parameters:
+      extra-packages:
+        type: string
+        default: ""
+      cache-suffix:
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - v1-pip-<< parameters.cache-suffix >>-{{ checksum "/tmp/pip-cache-key-<< parameters.cache-suffix >>" }}
+            - v1-pip-<< parameters.cache-suffix >>-
+      - run:
+          name: Install pytest << parameters.extra-packages >>
+          command: pip install --quiet pytest << parameters.extra-packages >>
+      - save_cache:
+          key: v1-pip-<< parameters.cache-suffix >>-{{ checksum "/tmp/pip-cache-key-<< parameters.cache-suffix >>" }}
+          paths:
+            - ~/.cache/pip
+
+  # Run pytest and emit JUnit XML for CircleCI test intelligence
+  run-pytest:
+    parameters:
+      test-dir:
+        type: string
+      results-dir:
+        type: string
+    steps:
+      - run:
+          name: Create results directory
+          command: mkdir -p << parameters.results-dir >>
+      - run:
+          name: Run pytest – << parameters.test-dir >>
+          command: >
+            python3 -m pytest << parameters.test-dir >>
+            -v --tb=short
+            --junit-xml=<< parameters.results-dir >>/results.xml
+      - store_test_results:
+          path: << parameters.results-dir >>
+      - store_artifacts:
+          path: << parameters.results-dir >>
+          destination: test-results/<< parameters.test-dir >>
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── Root Node.js package: validate + test ──────────────────────────────────
+  test-node:
+    executor: node22
+    steps:
+      - checkout
+      - install-root-deps
+      - run:
+          name: Validate package manifest
+          command: npm run validate
+      - run:
+          name: Run opal-koboi tests
+          command: node test/opal-koboi.test.mjs
+
+  # ── Root Node.js package: build dist/ ─────────────────────────────────────
+  build-node:
+    executor: node22
+    steps:
+      - checkout
+      - install-root-deps
+      - run:
+          name: Build package
+          command: npm run build
+      - store_artifacts:
+          path: dist/
+          destination: dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/
+
+  # ── Artemis Agent: type-check + Vitest ────────────────────────────────────
+  test-artemis:
+    executor: node22
+    steps:
+      - checkout
+      - install-artemis-deps
+      - run:
+          name: TypeScript type check
+          command: npm run lint
+          working_directory: apps/artemis-agent
+      - run:
+          name: Run Vitest
+          command: npm test
+          working_directory: apps/artemis-agent
+
+  # ── Python: ClearFlow ─────────────────────────────────────────────────────
+  # Core + tests are stdlib-only; pytest added for JUnit XML reporting.
+  test-clearflow:
+    executor: python313
+    steps:
+      - checkout
+      - run:
+          name: Write pip cache key
+          command: echo "clearflow-pytest-only" > /tmp/pip-cache-key-clearflow
+      - install-pytest:
+          cache-suffix: clearflow
+      - run-pytest:
+          test-dir: clearflow/tests
+          results-dir: /tmp/test-results/clearflow
+
+  # ── Python: ClearPulse ────────────────────────────────────────────────────
+  # Core is stdlib; PyYAML used for tunable risk rules in config.
+  test-clearpulse:
+    executor: python313
+    steps:
+      - checkout
+      - run:
+          name: Write pip cache key
+          command: >
+            echo "clearpulse-pytest-pyyaml" > /tmp/pip-cache-key-clearpulse
+      - install-pytest:
+          cache-suffix: clearpulse
+          extra-packages: "PyYAML>=6.0.3"
+      - run-pytest:
+          test-dir: clearpulse/tests
+          results-dir: /tmp/test-results/clearpulse
+
+  # ── Python: Job Agent ─────────────────────────────────────────────────────
+  # All tests run on stdlib; anthropic SDK is an optional runtime upgrade.
+  test-job-agent:
+    executor: python313
+    steps:
+      - checkout
+      - run:
+          name: Write pip cache key
+          command: echo "job-agent-pytest-only" > /tmp/pip-cache-key-job-agent
+      - install-pytest:
+          cache-suffix: job-agent
+      - run-pytest:
+          test-dir: job_agent/tests
+          results-dir: /tmp/test-results/job-agent
+
+  # ── npm publish ───────────────────────────────────────────────────────────
+  # Requires context `npm-publish` with NPM_TOKEN set.
+  publish-npm:
+    executor: node22
+    steps:
+      - checkout
+      - install-root-deps
+      - attach_workspace:
+          at: .
+      - run:
+          name: Authenticate with npm registry
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - run:
+          name: Publish @clearglassinc/opal-koboi
+          command: npm publish --access public
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WORKFLOWS
+# ─────────────────────────────────────────────────────────────────────────────
+workflows:
+
+  # ── CI: runs on every push ────────────────────────────────────────────────
+  ci:
+    jobs:
+      # Parallel: Node test + Python tests (all independent)
+      - test-node
+      - test-artemis
+      - test-clearflow
+      - test-clearpulse
+      - test-job-agent
+
+      # Build only after Node tests pass (produces dist/ workspace artifact)
+      - build-node:
+          requires:
+            - test-node
+
+      # Human approval gate — main branch only, after all tests + build
+      - hold-publish:
+          type: approval
+          requires:
+            - build-node
+            - test-artemis
+            - test-clearflow
+            - test-clearpulse
+            - test-job-agent
+          filters:
+            branches:
+              only: main
+
+      # Publish — executes after approval, on main branch only
+      - publish-npm:
+          requires:
+            - hold-publish
+          context: npm-publish
+          filters:
+            branches:
+              only: main

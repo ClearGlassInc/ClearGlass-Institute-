@@ -1,0 +1,37 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  setup-copilot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run build
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Copilot environment validation
+        run: |
+          echo "Validating repository for Copilot integration..."
+          echo "Repository ready."

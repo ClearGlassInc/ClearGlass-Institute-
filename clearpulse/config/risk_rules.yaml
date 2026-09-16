@@ -1,0 +1,33 @@
+# ClearPulse dynamic risk-scoring rules.
+#
+# Tunable by the compliance team WITHOUT redeploying code. Each factor caps its
+# own contribution; the final score is capped at `total_cap`. Keep this file in
+# sync with clearpulse.engine.risk.DEFAULT_RULES.
+version: 1
+
+thresholds:
+  low_max: 25      # score <= low_max  -> "low"  (dashboard green)
+  medium_max: 69   # low_max < score <= medium_max -> "medium" (yellow)
+  high_min: 70     # score >= high_min -> "high" (red, raises alert)
+
+factors:
+  temporal_billing_overlap:
+    max_points: 40
+    overlap_ratio_trigger: 0.6   # overlap_ratio above this awards full points
+
+  unusual_procedure_mix:
+    max_points: 20
+
+  access_volume_spike:
+    max_points: 50
+    zscore_full_points: 6.0      # z-score that maps to the full 50 points
+
+  high_risk_patient:
+    max_points: 10
+
+  off_hours_activity:
+    max_points: 10
+    business_start_hour: 7       # inclusive
+    business_end_hour: 19        # exclusive
+
+total_cap: 100

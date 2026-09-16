@@ -1,0 +1,46 @@
+{
+  "name": "ClearGlass Enterprise Automation Workflow",
+  "steps": [
+    {
+      "type": "note",
+      "name": "mission-intake",
+      "message": "Start Opal-Koboi enterprise automation control cycle."
+    },
+    {
+      "type": "plan",
+      "name": "build-priority-plan",
+      "input": {
+        "mission": "ClearGlass enterprise automation launch",
+        "tasks": [
+          {
+            "title": "Deploy enterprise orchestration core",
+            "owner": "ClearGlass Inc.",
+            "impact": 98,
+            "urgency": 86,
+            "confidence": 78,
+            "effort": 52
+          },
+          {
+            "title": "Enable audit logging and workflow evidence records",
+            "owner": "ClearGlass Inc.",
+            "impact": 88,
+            "urgency": 76,
+            "confidence": 86,
+            "effort": 38
+          }
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "name": "readiness-gate",
+      "value": 86,
+      "minimum": 75
+    },
+    {
+      "type": "gate",
+      "name": "release-control",
+      "allow": true
+    }
+  ]
+}

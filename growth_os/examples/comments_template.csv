@@ -1,0 +1,4 @@
+comment_id,post_id,created_at,author,body,author_followers,likes,replies_count
+101,1,2026-05-18 09:45:00,opsleader,"Exactly. Our team keeps buying tools instead of fixing process.",3200,16,2
+102,1,2026-05-18 09:52:00,securityskeptic,"Wrong. The bigger issue is shadow AI and no governance.",8400,22,5
+103,2,2026-05-19 12:28:00,legalops,"This is the first accurate take I have seen on workflow risk.",2100,11,1

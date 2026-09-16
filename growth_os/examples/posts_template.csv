@@ -1,0 +1,4 @@
+post_id,created_at,text,topic,hook_style,structure,cta,tone,impressions,likes,replies,reposts,profile_visits,follows_gained
+1,2026-05-18 09:30:00,"Most companies do not have an AI problem. They have a systems problem.",AI,contrarian,problem-solution,question,confident,12800,220,58,31,410,24
+2,2026-05-19 12:15:00,"The visible cyber problem gets attention. The governance problem does the damage.",cybersecurity,insight,contrast,question,authoritative,9100,144,37,19,220,11
+3,2026-05-20 18:00:00,"If leadership needs AI to move faster, why is approval debt still killing execution?",policy,challenge,socratic,question,provocative,7600,102,41,14,180,9

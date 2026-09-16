@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CLEARGLASS Guardian Command Nexus Specification</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CLEARGLASS Guardian Command Nexus Specification</h1>
+</header>
+<h1 id="spec1-clearglass-guardian-command-nexus">SPEC‑1: CLEARGLASS
+Guardian Command Nexus</h1>
+<h2 id="purpose-and-scope">1. Purpose and Scope</h2>
+<p>The <strong>Guardian Command Nexus</strong> is the central
+command‑and‑control dashboard for CLEARGLASSINC’s GUARDIAN suite. It is
+a single‑page web application that provides operators with real‑time
+oversight of security workflows, simulated environments and system
+health. Its cyberpunk aesthetic hides a sophisticated architecture that
+orchestrates reactive state management, simulations, audit logging and
+AI‑driven command routing.</p>
+<p>The purpose of this specification is to clearly define the initial
+production version, inform refactoring of the existing prototype, and
+provide a base for future extension. In scope are the modules already
+present in the current HTML artifact—shell kernel, reactive state
+fabric, simulation grid, audit ledger, operator routing and AI command
+orchestration—as well as their integration points. Out of scope are
+detailed implementation of third‑party integrations (e.g. PowerShell
+modules) or platform‑specific deployment scripts; these may be defined
+in later specs.</p>
+<h2 id="system-overview">2. System Overview</h2>
+<p>The Command Nexus is architected as a client‑side SPA built with
+modern JavaScript (ES6+) and an application framework (assumed to be
+React or Vue given the prototype’s reactive state fabric). The
+application bootstraps a <strong>shell kernel</strong> that coordinates
+all subsystems and exposes a command bus to the UI. A <strong>state
+fabric</strong> holds canonical application state and broadcasts changes
+via events. A <strong>simulation grid</strong> synthesises sensor and
+environmental data at a configurable cadence to drive dashboards and AI
+reasoning. An <strong>audit ledger</strong> records all operator actions
+and system events with severity levels and metadata. <strong>AI command
+orchestration</strong> parses natural‑language intents from operators or
+connected systems and translates them into structured actions.
+<strong>Operator routing</strong> provides navigation between views
+(Dashboard, Pipeline, Surveillance, Tasks, AI Console, System) and
+orchestrates hotkeys and quick actions. The <strong>visual
+layer</strong> comprises responsive panels, charts and terminal
+components consistent with the cyberpunk console aesthetic.</p>
+<p>The HTML front end communicates with back‑end services via internal
+APIs. For the initial version these may be mocked or stubbed; the
+specification assumes eventual REST or GraphQL endpoints for persistence
+(audit log export, state snapshots), AI inference and external data
+feeds. External systems (e.g. network scanners, SOC tools) will
+integrate through defined interfaces but are not implemented in this
+revision.</p>
+<h2 id="core-requirements">3. Core Requirements</h2>
+<h3 id="functional-requirements">3.1 Functional Requirements</h3>
+<ul>
+<li><strong>Dashboard view:</strong> Display high‑level metrics from the
+simulation grid and real operations. Operators can interact with widgets
+to drill down into pipeline tasks, surveillance feeds and incident
+timelines.</li>
+<li><strong>Pipeline view:</strong> Visualise and manage workflows such
+as network scans, security automation or predictive analysis. Tasks move
+through stages with status indicators.</li>
+<li><strong>Surveillance view:</strong> Present live or simulated sensor
+feeds (e.g. CCTV, network traffic). Operators can control playback and
+adjust filters.</li>
+<li><strong>Tasks view:</strong> List assigned tasks, alerts and
+incidents with sorting and filtering. Operators can acknowledge, snooze
+or transfer tasks.</li>
+<li><strong>AI console:</strong> Accept natural‑language commands,
+display parsed intents and proposed actions, and allow operators to
+confirm execution. Provide a transcript of AI conversations.</li>
+<li><strong>System view:</strong> Show system health (CPU, memory,
+network) and log messages. Allow administrators to start/stop
+subsystems.</li>
+<li><strong>Audit logging:</strong> Record all operator actions
+(navigation, confirmations, command executions), AI actions, and system
+events with timestamp, severity and context.</li>
+<li><strong>State persistence:</strong> Persist state fabric snapshots
+and audit ledger entries to local storage or back‑end services. Support
+schema versioning to handle migrations.</li>
+<li><strong>Simulation controls:</strong> Provide settings to adjust
+simulation cadence, toggle stochastic/deterministic mode and seed
+values.</li>
+</ul>
+<h3 id="nonfunctional-requirements">3.2 Non‑Functional Requirements</h3>
+<ul>
+<li><strong>Performance:</strong> The dashboard should render initial
+content within 2 seconds on modern browsers and maintain 60 fps during
+interaction. Simulation updates should not block UI rendering.</li>
+<li><strong>Reliability:</strong> The shell kernel must recover
+gracefully from subsystem failures. Unhandled exceptions should be
+captured by the audit ledger and displayed in the System view.</li>
+<li><strong>Usability:</strong> The interface shall support keyboard
+navigation and screen‑reader labels. Hotkeys must not conflict with
+browser shortcuts.</li>
+<li><strong>Maintainability:</strong> Code should be modularised by
+subsystem with typed interfaces. Event names and payload shapes should
+be centralised. Tests should cover reducers, command parsing and
+critical UI flows.</li>
+<li><strong>Extensibility:</strong> New views and AI intents should be
+pluggable without changing core modules. The spec defines clear
+extension points for PowerShell integration and SOC workflows.</li>
+</ul>
+<h3 id="scalability-considerations">3.3 Scalability Considerations</h3>
+<p>The simulation grid and AI routing may grow as new sensors and models
+are added. Architect the state fabric so that data entities are
+normalised and keyed by stable identifiers. External service calls must
+be asynchronous with timeout and retry logic. Logging should be batched
+for export rather than writing per event.</p>
+<h2 id="domain-model">4. Domain Model</h2>
+<p>The domain is centred on <strong>events</strong> generated by the
+simulation, operator actions, AI commands and external systems. The
+following entities capture domain concepts:</p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 35%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Entity</th>
+<th>Description</th>
+<th>Fields / Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Task</code></td>
+<td>Represents a unit of work in the pipeline (e.g. network scan, report
+generation).</td>
+<td><code>id</code>, <code>name</code>, <code>type</code>,
+<code>status</code>, <code>assignedTo</code>, <code>createdAt</code>,
+<code>updatedAt</code>, <code>dueAt</code>, <code>parameters</code>
+(object), <code>logs</code> (array of references)</td>
+</tr>
+<tr class="even">
+<td><code>Alert</code></td>
+<td>Generated when simulation or monitoring detects an anomaly.</td>
+<td><code>id</code>, <code>severity</code>, <code>source</code>
+(simulation sensor, external feed), <code>description</code>,
+<code>timestamp</code>, <code>acknowledgedBy</code>,
+<code>relatedTaskId</code></td>
+</tr>
+<tr class="odd">
+<td><code>Incident</code></td>
+<td>Collection of related alerts or tasks that constitute a security
+incident.</td>
+<td><code>id</code>, <code>name</code>, <code>description</code>,
+<code>startTime</code>, <code>endTime</code>, <code>alerts</code> (array
+of alert ids), <code>tasks</code> (array of task ids),
+<code>status</code>, <code>owner</code></td>
+</tr>
+<tr class="even">
+<td><code>TimelineEvent</code></td>
+<td>Ordered events displayed on dashboards and surveillance views.</td>
+<td><code>id</code>, <code>type</code>, <code>timestamp</code>,
+<code>data</code> (arbitrary JSON), <code>relatedId</code>
+(task/incident/alert), <code>displayLabel</code>,
+<code>severity</code></td>
+</tr>
+<tr class="odd">
+<td><code>AuditEntry</code></td>
+<td>Immutable record of an action or system event.</td>
+<td><code>id</code>, <code>timestamp</code>, <code>actor</code>
+(operator username or system), <code>action</code> (string key),
+<code>context</code> (object), <code>severity</code>,
+<code>correlationId</code></td>
+</tr>
+<tr class="even">
+<td><code>SimulationState</code></td>
+<td>Holds state of simulated environment at a given tick.</td>
+<td><code>tick</code>, <code>readings</code> (map of sensor name →
+value), <code>activeEntities</code> (list of simulated objects),
+<code>seed</code>, <code>mode</code>
+(<code>deterministic|stochastic</code>)</td>
+</tr>
+<tr class="odd">
+<td><code>OperatorSession</code></td>
+<td>Captures logged‑in user’s session for routing and state
+restoration.</td>
+<td><code>userId</code>, <code>roles</code>, <code>startTime</code>,
+<code>endTime</code>, <code>viewPreferences</code>,
+<code>hotkeyBindings</code>, <code>activeTasks</code> (list of task
+ids)</td>
+</tr>
+<tr class="even">
+<td><code>AIIntent</code></td>
+<td>Parsed intent from the AI command orchestration.</td>
+<td><code>id</code>, <code>input</code> (raw text),
+<code>intentType</code>, <code>entities</code> (map),
+<code>confidence</code>, <code>proposedActions</code> (array),
+<code>resolved</code> (<code>boolean</code>),
+<code>resolutionNotes</code></td>
+</tr>
+</tbody>
+</table>
+<p>Entities are stored in the state fabric keyed by <code>id</code>;
+relations are maintained through reference fields. Ownership of state
+follows these rules:</p>
+<ul>
+<li><strong>Operator client:</strong> Maintains transient UI state
+(collapsed panels, unsaved form inputs) and active tab.</li>
+<li><strong>State fabric:</strong> Owns canonical domain entities;
+updates occur only through reducers triggered by dispatched events. No
+module writes state directly.</li>
+<li><strong>Back‑end services:</strong> Persist long‑term state (audit
+log, snapshots) and provide data to simulation or AI modules. The front
+end writes via API calls.</li>
+</ul>
+<h2 id="ai-command-orchestration">5. AI Command Orchestration</h2>
+<p>AI command orchestration converts natural‑language instructions into
+structured commands executed by the system. The module comprises a
+<strong>parser</strong>, an <strong>intent classifier</strong>, and an
+<strong>execution planner</strong>.</p>
+<h3 id="intent-handling-model">5.1 Intent Handling Model</h3>
+<ol type="1">
+<li><strong>Input acquisition:</strong> Operator types or speaks a
+command in the AI console.</li>
+<li><strong>Pre‑processing:</strong> Text is normalised (case‑folding,
+punctuation removal) and tokenised. A local model or cloud service
+classifies the intent type and extracts entities (target task, time
+range, severity, etc.).</li>
+<li><strong>Intent representation:</strong> The parser produces an
+<code>AIIntent</code> object. Example intents include
+<code>create_task</code>, <code>escalate_alert</code>,
+<code>summarize_incident</code>, <code>adjust_simulation</code>,
+<code>query_state</code>, <code>execute_powershell</code> (future
+extension).</li>
+<li><strong>Confirmation dialog:</strong> For intents with side effects,
+the console presents a summary of proposed actions and awaits operator
+confirmation.</li>
+<li><strong>Execution:</strong> Upon confirmation, commands are
+dispatched through the shell kernel to relevant subsystems (e.g. state
+fabric for task creation, pipeline orchestrator for workflow
+changes).</li>
+<li><strong>Feedback:</strong> Results, success or error messages are
+returned to the AI console, appended to the transcript and logged in the
+audit ledger.</li>
+</ol>
+<h3 id="command-parsing-approach">5.2 Command Parsing Approach</h3>
+<p>For the initial implementation, a rule‑based parser suffices. A
+mapping table translates imperative verbs to intent types and uses
+regular expressions to extract entities. For example:</p>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 17%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Example input</th>
+<th>Detected intent</th>
+<th>Extracted entities</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>“Run a network scan on subnet 10.0.0.0”</td>
+<td><code>create_task</code></td>
+<td><code>{ taskType: "networkScan", target: "10.0.0.0" }</code></td>
+</tr>
+<tr class="even">
+<td>“Escalate all high severity alerts”</td>
+<td><code>escalate_alert</code></td>
+<td><code>{ severity: "high" }</code></td>
+</tr>
+<tr class="odd">
+<td>“Summarize the last incident report”</td>
+<td><code>summarize_incident</code></td>
+<td><code>{ incidentScope: "last" }</code></td>
+</tr>
+</tbody>
+</table>
+<p>Ambiguities are resolved by asking clarifying questions: if multiple
+tasks match “Run the scan again,” the system lists candidates and
+requests selection. Unknown intents trigger an error message with
+guidance.</p>
+<h3 id="error-handling-and-ambiguity-resolution">5.3 Error Handling and
+Ambiguity Resolution</h3>
+<ul>
+<li>Unknown verbs or malformed commands produce a
+<code>unrecognized_intent</code> with an explanatory message.</li>
+<li>Missing required entities prompt the operator to supply the missing
+information.</li>
+<li>Execution errors (e.g. network call failures) are surfaced to the
+operator and recorded in the audit ledger at
+severity = <code>error</code>.</li>
+<li>Timeouts in AI inference result in retries up to three times; after
+which a <code>timeout</code> response is returned.</li>
+</ul>
+<h2 id="reactive-state-fabric">6. Reactive State Fabric</h2>
+<h3 id="store-design">6.1 Store Design</h3>
+<p>The state fabric follows a unidirectional data flow pattern. A single
+store holds all domain entities in normalised form. Actions dispatched
+on the shell kernel are processed by <strong>reducers</strong> that
+compute new state snapshots without mutation. Views subscribe to
+selectors that derive data slices and re‑render when relevant state
+changes.</p>
+<p>State is partitioned into logical modules:</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 85%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Slice</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>tasks</code></td>
+<td>Map of task ID → <code>Task</code></td>
+</tr>
+<tr class="even">
+<td><code>alerts</code></td>
+<td>Map of alert ID → <code>Alert</code></td>
+</tr>
+<tr class="odd">
+<td><code>incidents</code></td>
+<td>Map of incident ID → <code>Incident</code></td>
+</tr>
+<tr class="even">
+<td><code>timeline</code></td>
+<td>Ordered list of <code>TimelineEvent</code></td>
+</tr>
+<tr class="odd">
+<td><code>audit</code></td>
+<td>Append‑only list of <code>AuditEntry</code> (may be stored
+separately for performance)</td>
+</tr>
+<tr class="even">
+<td><code>simulation</code></td>
+<td>Current <code>SimulationState</code> and history buffer</td>
+</tr>
+<tr class="odd">
+<td><code>operator</code></td>
+<td><code>OperatorSession</code> information</td>
+</tr>
+<tr class="even">
+<td><code>ai</code></td>
+<td>Current AI console state (input text, list of <code>AIIntent</code>,
+transcript)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events-reducers-selectors-and-subscriptions">6.2 Events,
+Reducers, Selectors and Subscriptions</h3>
+<ul>
+<li><strong>Events (actions):</strong> Named messages with type and
+payload (e.g. <code>TASK_CREATE</code>, <code>ALERT_ACKNOWLEDGE</code>,
+<code>AI_INTENT_RESOLVED</code>). Event names are namespaced
+(e.g. <code>ai/intentResolved</code>).</li>
+<li><strong>Reducers:</strong> Pure functions that accept current state
+and an event payload and return a new state. Each slice may have its own
+reducer composition but uses a shared schema version constant.</li>
+<li><strong>Selectors:</strong> Functions that derive computed data for
+components, memoised for performance. For example,
+<code>selectActiveAlertsBySeverity(state, severity)</code> returns
+filtered alerts.</li>
+<li><strong>Subscriptions:</strong> UI components and subsystems
+subscribe to relevant selectors. When state updates, subscribers
+re‑evaluate selectors and update the UI.</li>
+</ul>
+<h3 id="persistence-strategy-and-schema-versioning">6.3 Persistence
+Strategy and Schema Versioning</h3>
+<p>State snapshots and audit logs must be persisted for recovery and
+analysis. The front end serialises the state fabric (excluding transient
+UI state) to localStorage or IndexedDB on intervals and upon critical
+events (e.g. navigation away). A <code>schemaVersion</code> field is
+stored along with the data. When loading persisted state, the shell
+kernel checks the version; if mismatched, a migration script transforms
+old data to the current schema. Audit ledger entries are written to a
+separate storage area for efficient append. Exporting the audit ledger
+triggers a synchronous retrieval of all entries and sends them to a
+back‑end API for archival.</p>
+<h2 id="simulation-grid">7. Simulation Grid</h2>
+<p>The simulation grid models environmental and system processes to
+provide realistic data streams in the absence of live feeds. It can
+simulate sensor readings (temperature, bandwidth usage, CPU load),
+adversarial behaviours (intrusion attempts, DDoS patterns) and pipeline
+tasks (scans, automations).</p>
+<h3 id="update-cadence">7.1 Update Cadence</h3>
+<p>A scheduler in the shell kernel triggers simulation updates at a
+configurable interval (default: 1 second). Each tick advances the
+<code>tick</code> counter, updates sensor readings based on
+deterministic or stochastic functions, and emits
+<code>SIMULATION_UPDATE</code> events with the new
+<code>SimulationState</code>. The update cadence should be adjustable
+via the System view.</p>
+<h3 id="deterministic-vs-stochastic-behaviour">7.2 Deterministic vs
+Stochastic Behaviour</h3>
+<p>Operators can toggle the simulation mode:</p>
+<ul>
+<li><strong>Deterministic:</strong> Uses fixed seed and predictable
+progression. Useful for demos and regression testing.</li>
+<li><strong>Stochastic:</strong> Adds noise and random events using
+seeded RNG. Suitable for training and stress testing.</li>
+</ul>
+<p>Sensor models should be encapsulated in discrete functions that
+accept seed, tick and parameters and output values. New models can be
+added without modifying the scheduler.</p>
+<h3 id="impact-on-ui-and-ai-output">7.3 Impact on UI and AI Output</h3>
+<p>Simulation updates drive the data visualised in dashboards and may
+generate alerts or incidents when thresholds are crossed. The AI command
+orchestration can query simulation state to answer operator questions
+such as “What is the current CPU load?” Therefore, the simulation grid
+must publish its state through the state fabric and allow query by
+selectors. When the simulation triggers events (e.g. simulated
+intrusion), corresponding actions (e.g. <code>ALERT_CREATE</code>) are
+dispatched.</p>
+<h2 id="audit-ledger">8. Audit Ledger</h2>
+<p>The audit ledger is a tamper‑evident log of events for accountability
+and post‑mortem analysis.</p>
+<h3 id="what-gets-logged">8.1 What Gets Logged</h3>
+<ul>
+<li><strong>Operator actions:</strong> Navigation changes, form
+submissions, AI intent confirmations, task assignments, acknowledgement
+of alerts.</li>
+<li><strong>System events:</strong> Simulation updates, pipeline
+transitions, subsystem errors, configuration changes.</li>
+<li><strong>Security events:</strong> Login/logout, permission changes,
+failed authentication attempts.</li>
+<li><strong>AI interactions:</strong> Raw command text, parsed intent,
+execution results and errors.</li>
+</ul>
+<p>Each entry includes a severity level (<code>info</code>,
+<code>warning</code>, <code>error</code>, <code>critical</code>) and may
+reference related entities via <code>correlationId</code> for
+cross‑linking in UI.</p>
+<h3 id="retention-and-export-strategy">8.2 Retention and Export
+Strategy</h3>
+<p>Audit entries are persisted locally for the duration of the operator
+session and periodically flushed to a back‑end service. The export
+process groups entries by date and severity and uploads in batches to
+minimise network overhead. An operator can initiate a manual export
+through the System view. Retention policy is configurable (e.g. keep
+last 10 days on client), and expired entries are purged once
+exported.</p>
+<h3 id="relationship-to-security-and-operator-actions">8.3 Relationship
+to Security and Operator Actions</h3>
+<p>The audit ledger forms part of the security boundary: destructive
+actions (e.g. deleting tasks, executing PowerShell commands) must
+require explicit confirmation and generate high‑severity audit entries.
+The ledger should be write‑only from the perspective of modules; only
+the System view has read access for display. Permissioning is enforced
+such that only administrators can export or clear logs.</p>
+<h2 id="operator-routing-and-ux">9. Operator Routing and UX</h2>
+<p>The operator routing subsystem manages navigation and user experience
+across the various views.</p>
+<h3 id="tabs-views-and-hotkeys">9.1 Tabs, Views and Hotkeys</h3>
+<ul>
+<li><strong>Views:</strong> <code>dashboard</code>,
+<code>pipeline</code>, <code>surveillance</code>, <code>tasks</code>,
+<code>aiConsole</code>, <code>system</code>. The shell kernel maintains
+the active view in the <code>operator</code> slice.</li>
+<li><strong>Tabs:</strong> Represent open contexts within each view
+(e.g. multiple task details). Tabs can be closed or rearranged.</li>
+<li><strong>Hotkeys:</strong> Provide rapid actions:
+e.g. <code>Ctrl+1</code>..<code>Ctrl+6</code> to switch views,
+<code>Ctrl+/</code> to focus on AI console, <code>Ctrl+S</code> to save
+state snapshot. Hotkey bindings are configurable in operator
+preferences.</li>
+</ul>
+<h3 id="boot-sequence-and-loading-states">9.2 Boot Sequence and Loading
+States</h3>
+<p>Upon page load, the shell kernel executes a boot sequence:</p>
+<ol type="1">
+<li>Initialise state fabric with default schema and attempt to hydrate
+from persisted snapshot.</li>
+<li>Start simulation grid and load any saved seed/mode settings.</li>
+<li>Initialise audit ledger and log <code>SYSTEM_BOOT</code> event.</li>
+<li>Launch AI command module and load conversation history if
+available.</li>
+<li>Render UI components once core modules are initialised. Display
+loading indicators and error messages if subsystems fail to start.</li>
+</ol>
+<h3 id="accessibility-and-operator-feedback">9.3 Accessibility and
+Operator Feedback</h3>
+<p>The UI must support ARIA roles for screen readers. Colour choices
+should meet WCAG 2.1 contrast ratios. Error and success notifications
+should appear in an accessible toast component. Feedback from AI
+commands should clearly differentiate between system messages, AI
+suggestions and operator actions. Operators should receive confirmation
+dialogues for actions with side effects. Focus management must ensure
+modals trap focus until dismissed.</p>
+<h2 id="integration-interfaces">10. Integration Interfaces</h2>
+<h3 id="internal-apis-between-subsystems">10.1 Internal APIs between
+Subsystems</h3>
+<p>The shell kernel exposes a set of event names and payload shapes that
+subsystems use to interact.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 35%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Event Name</th>
+<th>Payload shape</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>task/create</code></td>
+<td><code>{ name, type, parameters }</code></td>
+<td>Request creation of a new Task. Reducer allocates <code>id</code>
+and adds to store.</td>
+</tr>
+<tr class="even">
+<td><code>task/updateStatus</code></td>
+<td><code>{ id, status }</code></td>
+<td>Update a task’s status; triggers pipeline update and audit
+entry.</td>
+</tr>
+<tr class="odd">
+<td><code>alert/acknowledge</code></td>
+<td><code>{ id, actorId }</code></td>
+<td>Mark an alert as acknowledged by an operator.</td>
+</tr>
+<tr class="even">
+<td><code>incident/resolve</code></td>
+<td><code>{ id, resolutionNotes }</code></td>
+<td>Mark an incident as resolved and log outcome.</td>
+</tr>
+<tr class="odd">
+<td><code>simulation/update</code></td>
+<td><code>{ tick, readings, activeEntities }</code></td>
+<td>New simulation state from grid. Used by selectors to update
+charts.</td>
+</tr>
+<tr class="even">
+<td><code>ai/intentParsed</code></td>
+<td><code>{ intentId, intentType, entities, confidence }</code></td>
+<td>AI parser output; triggers display of proposed actions in AI
+console.</td>
+</tr>
+<tr class="odd">
+<td><code>ai/intentConfirmed</code></td>
+<td><code>{ intentId }</code></td>
+<td>Operator confirms execution; dispatch to appropriate event
+(task/create, etc.).</td>
+</tr>
+<tr class="even">
+<td><code>audit/log</code></td>
+<td><code>{ actor, action, context, severity }</code></td>
+<td>Append entry to audit ledger.</td>
+</tr>
+<tr class="odd">
+<td><code>router/navigate</code></td>
+<td><code>{ view, params }</code></td>
+<td>Switch active view or open context tab.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="external-interfaces">10.2 External Interfaces</h3>
+<p>The initial implementation can stub external services. Anticipated
+REST endpoints include:</p>
+<ul>
+<li><code>POST /api/audit/export</code> – Accepts a batch of
+<code>AuditEntry</code> and returns status.</li>
+<li><code>GET /api/state/snapshot</code> – Returns latest persisted
+state for hydration.</li>
+<li><code>POST /api/ai/parse</code> – Submits natural‑language input and
+returns <code>AIIntent</code>. In early versions this may be handled
+locally via rule‑based parser.</li>
+<li><code>POST /api/powershell/execute</code> – Executes a PowerShell
+script (future extension). Secured and audited.</li>
+</ul>
+<p>Event payloads exchanged with external services should be JSON
+encoded using camelCase keys. All requests include an authentication
+token (to be defined in security spec) and handle 401/403 responses by
+routing to login.</p>
+<h2 id="security-and-safety">11. Security and Safety</h2>
+<p>The Guardian Command Nexus must operate within strict security
+boundaries.</p>
+<ul>
+<li><strong>Trust boundaries:</strong> The browser front end is
+untrusted; back‑end services validate all inputs and enforce
+permissions. Only authorised operators may access sensitive views
+(e.g. incident details). CORS and CSP headers restrict loading of
+external resources.</li>
+<li><strong>Safe execution:</strong> Destructive actions (deleting
+entities, executing commands) require confirmation with a summary of the
+impact. Confirmation dialogues are modal and default to cancel.</li>
+<li><strong>Logging and permissioning:</strong> The audit ledger logs
+all actions with actor identity. Role‑based access controls restrict
+features (e.g. only administrators can export logs or change simulation
+mode). Passwords or secrets are never logged.</li>
+<li><strong>Data protection:</strong> Persisted data is encrypted at
+rest when stored server‑side. Transmission uses HTTPS with TLS 1.2+.
+Operators are automatically logged out after configurable
+inactivity.</li>
+<li><strong>Input sanitisation:</strong> All user inputs are escaped to
+prevent injection attacks. AI command parsing ensures that executed
+commands are within allowed actions; arbitrary code execution
+(e.g. PowerShell) is disabled in the first version.</li>
+</ul>
+<h2 id="acceptance-criteria">12. Acceptance Criteria</h2>
+<p>The first production‑ready release of the Guardian Command Nexus
+shall satisfy the following conditions:</p>
+<ol type="1">
+<li><strong>All views implemented:</strong> Dashboard, Pipeline,
+Surveillance, Tasks, AI Console and System views render correctly,
+switching via navigation or hotkeys.</li>
+<li><strong>State management:</strong> Actions correctly update the
+state fabric; selectors drive UI updates without direct mutation.</li>
+<li><strong>Simulation:</strong> Simulation grid generates data at
+configurable cadence and mode; dashboards reflect changes in real
+time.</li>
+<li><strong>AI console:</strong> Accepts natural‑language input,
+produces parsed intents via rule‑based parser, and executes confirmed
+commands, logging all actions.</li>
+<li><strong>Audit logging:</strong> All operator and system events
+recorded with severity and persisted; export function uploads logs.</li>
+<li><strong>Error handling:</strong> Subsystem failures are surfaced in
+System view; unhandled errors do not crash the application.</li>
+<li><strong>Accessibility:</strong> UI meets minimum WCAG 2.1 level AA
+requirements; keyboard navigation and screen reader labels are
+provided.</li>
+<li><strong>Tests:</strong> Unit tests cover reducers, simulation
+models, command parsing and routing; integration tests cover critical
+flows.</li>
+</ol>
+<h2 id="future-extensions">13. Future Extensions</h2>
+<h3 id="suggested-next-milestones">13.1 Suggested Next Milestones</h3>
+<ol type="1">
+<li><strong>PowerShell Integration:</strong> Define and implement secure
+execution of PowerShell scripts from AI commands. Provide a sandboxed
+environment and extend audit logging to capture command outputs.</li>
+<li><strong>SOC Workflow Integration:</strong> Integrate with Security
+Operations Centre tools (e.g. SIEM) to ingest real events and enrich
+simulation. Define connectors and mapping to domain entities.</li>
+<li><strong>Predictive Analysis and Anomaly Detection:</strong>
+Incorporate machine learning models to predict incidents based on
+historical data and simulation patterns. Present predictions in the
+dashboard with confidence intervals.</li>
+<li><strong>Reporting Module:</strong> Generate PDF or HTML reports
+summarising incidents, audit logs and simulation statistics. Provide
+scheduling and export options.</li>
+<li><strong>Collaboration Features:</strong> Enable multiple operators
+to collaborate, share annotations and transfer tasks. Implement
+WebSocket sync of state changes.</li>
+</ol>
+<h3 id="modularisation-roadmap">13.2 Modularisation Roadmap</h3>
+<p>The current monolithic front end should be decomposed into packages:
+<code>core</code> (shell kernel, state fabric), <code>ui</code>
+(components and styling), <code>simulation</code>, <code>ai</code>,
+<code>audit</code>, and <code>integrations</code>. Each package exposes
+public APIs and can be independently tested. Use TypeScript to add type
+safety and facilitate refactoring.</p>
+<h3 id="potential-enhancements">13.3 Potential Enhancements</h3>
+<ul>
+<li><strong>Pluggable AI intents:</strong> Allow external providers to
+register new intent handlers via configuration.</li>
+<li><strong>Visual theming:</strong> Support dark/light modes and custom
+themes while preserving the console aesthetic.</li>
+<li><strong>Mobile responsiveness:</strong> Adapt layouts for tablet and
+small screens without losing functionality.</li>
+<li><strong>Advanced analytics:</strong> Integrate streaming analytics
+dashboards (e.g. Grafana) for real‑time metrics.</li>
+</ul>
+<h2 id="implementation-priority">Implementation Priority</h2>
+<ol type="1">
+<li><strong>Core Framework and State Fabric:</strong> Establish the
+shell kernel, event bus, reducers, selectors and routing. Implement
+domain models and ensure persistence with schema versioning. Without
+this foundation, other modules cannot be integrated.</li>
+<li><strong>Simulation Grid and Dashboard:</strong> Build the simulation
+scheduler and sensor models, and render dashboard widgets. Provide
+controls for cadence and mode. This enables demonstrable value early and
+facilitates testing of state updates and rendering.</li>
+<li><strong>AI Command Orchestration:</strong> Implement the rule‑based
+parser, console UI and command execution flow with confirmation
+dialogues. Connect to state fabric and logging. This unlocks advanced
+interactions and sets the stage for future PowerShell and SOC
+integrations.</li>
+</ol>
+</body>
+</html>

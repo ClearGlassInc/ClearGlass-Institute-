@@ -1,0 +1,158 @@
+{
+  "system": {
+    "name": "Clearglassinc Aerospace Market Intelligence System",
+    "version": "5.0.0",
+    "copyright": "© 2025-2030 Clearglassinc. All Rights Reserved.",
+    "environment": "production",
+    "debug_mode": false
+  },
+  "company": {
+    "name": "Clearglassinc",
+    "website": "https://www.clearglassinc.com",
+    "contact": "intelligence@clearglassinc.com",
+    "license_key": "CLEARGLASS-AERO-2025-ENTERPRISE"
+  },
+  "data_sources": {
+    "public_apis": {
+      "spacex": {
+        "enabled": true,
+        "url": "https://api.spacexdata.com/v4/",
+        "rate_limit": 1000,
+        "timeout": 10
+      },
+      "nasa": {
+        "enabled": true,
+        "url": "https://api.nasa.gov/",
+        "api_key": "DEMO_KEY",
+        "rate_limit": 1000
+      },
+      "sec_edgar": {
+        "enabled": true,
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar",
+        "rate_limit": 10,
+        "user_agent": "Clearglassinc intelligence@clearglassinc.com"
+      },
+      "usa_spending": {
+        "enabled": true,
+        "url": "https://api.usaspending.gov/api/v2/",
+        "rate_limit": 100
+      }
+    },
+    "databases": {
+      "sqlite": {
+        "path": "./database/clearglassinc_aerospace.db",
+        "timeout": 30
+      }
+    }
+  },
+  "data_collection": {
+    "sectors": [
+      "space_launch",
+      "defense_aerospace",
+      "satellite"
+    ],
+    "refresh_interval_hours": 24,
+    "max_retries": 3,
+    "retry_delay_seconds": 5,
+    "enable_realtime": false
+  },
+  "analysis": {
+    "metrics": [
+      "market_share",
+      "sentiment_score",
+      "growth_rate",
+      "competitive_position",
+      "innovation_index",
+      "risk_score"
+    ],
+    "sentiment_threshold": {
+      "very_positive": 0.80,
+      "positive": 0.60,
+      "neutral": 0.40,
+      "negative": 0.20
+    },
+    "growth_classification": {
+      "high_growth": 0.70,
+      "stable": 0.50,
+      "contracting": 0.30
+    }
+  },
+  "predictive_modeling": {
+    "enabled": true,
+    "algorithms": [
+      "LSTM",
+      "RandomForest",
+      "GradientBoosting",
+      "ARIMA"
+    ],
+    "forecast_horizon_months": 60,
+    "confidence_threshold": 0.85,
+    "scenarios": [
+      "baseline",
+      "optimistic",
+      "pessimistic"
+    ],
+    "risk_modeling": {
+      "economic_recession_probability": 0.20,
+      "tech_disruption_probability": 0.35,
+      "regulatory_change_probability": 0.25
+    }
+  },
+  "reporting": {
+    "output_formats": [
+      "Excel",
+      "PDF",
+      "JSON",
+      "Dashboard"
+    ],
+    "branding": {
+      "company_name": "Clearglassinc",
+      "logo_path": "./assets/clearglassinc_logo.png",
+      "color_primary": "#0066CC",
+      "color_secondary": "#00A86B",
+      "font": "Arial"
+    },
+    "retention_days": 365,
+    "auto_cleanup": true
+  },
+  "security": {
+    "encryption_enabled": true,
+    "api_key_encryption": true,
+    "audit_logging": true,
+    "data_anonymization": false
+  },
+  "performance": {
+    "max_workers": 10,
+    "chunk_size": 100,
+    "cache_enabled": true,
+    "cache_ttl_hours": 12
+  },
+  "notifications": {
+    "email_alerts": {
+      "enabled": false,
+      "recipients": ["alerts@clearglassinc.com"],
+      "smtp_server": "smtp.clearglassinc.com",
+      "smtp_port": 587
+    },
+    "alert_thresholds": {
+      "critical_risk_level": "high",
+      "sentiment_drop_threshold": -0.15,
+      "market_volatility_threshold": 0.25
+    }
+  },
+  "scalability": {
+    "distributed_processing": false,
+    "cloud_storage": {
+      "enabled": false,
+      "provider": "aws_s3",
+      "bucket": "clearglassinc-aerospace-data"
+    },
+    "load_balancing": false
+  },
+  "compliance": {
+    "gdpr_compliant": true,
+    "data_retention_policy": "365_days",
+    "export_format": "JSON",
+    "anonymization_required": false
+  }
+}

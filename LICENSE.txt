@@ -1,0 +1,248 @@
+CLEARGLASSINC AEROSPACE INTELLIGENCE SYSTEM
+COMMERCIAL SOFTWARE LICENSE AGREEMENT
+Version 2.0
+
+Copyright © 2025-2030 Clearglassinc. All rights reserved.
+
+═══════════════════════════════════════════════════════════════════════════
+
+IMPORTANT - READ CAREFULLY BEFORE USING THIS SOFTWARE
+
+This License Agreement ("Agreement") is a legal agreement between you (either an 
+individual or a single entity, referred to as "Licensee") and Clearglassinc 
+("Licensor") for the software product identified above, which includes computer 
+software and may include associated media, printed materials, and online or 
+electronic documentation ("Software").
+
+BY INSTALLING, COPYING, OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND 
+BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS 
+AGREEMENT, DO NOT INSTALL OR USE THE SOFTWARE.
+
+═══════════════════════════════════════════════════════════════════════════
+
+1. GRANT OF LICENSE
+
+Subject to the terms and conditions of this Agreement and payment of applicable 
+license fees, Licensor grants Licensee a non-exclusive, non-transferable license 
+to:
+
+   a) Install and use the Software on the number of devices specified in the 
+      purchase order
+   
+   b) Make one copy of the Software for backup or archival purposes only
+   
+   c) Use the Software for internal business purposes within the Licensee's 
+      organization
+   
+   d) Access the Software's source code for customization purposes within the 
+      Licensee's organization
+
+2. LICENSE RESTRICTIONS
+
+Licensee shall NOT:
+
+   a) Distribute, sublicense, rent, lease, or lend the Software to any third party
+   
+   b) Reverse engineer, decompile, or disassemble the Software, except as 
+      expressly permitted by applicable law
+   
+   c) Remove or alter any copyright, trademark, or proprietary notices from the 
+      Software
+   
+   d) Use the Software to provide services to third parties (service bureau use)
+   
+   e) Create derivative works based on the Software for commercial distribution
+   
+   f) Exceed the number of authorized users or devices specified in the purchase 
+      order
+   
+   g) Use the Software in any manner that violates applicable laws or regulations
+
+3. INTELLECTUAL PROPERTY RIGHTS
+
+The Software is licensed, not sold. Licensor retains all right, title, and 
+interest in and to the Software, including all intellectual property rights. 
+This includes:
+
+   a) All copyrights, trademarks, trade secrets, and patents
+   b) All proprietary algorithms and methodologies
+   c) All documentation and support materials
+   d) All modifications and derivative works created by Licensor
+
+4. PROPRIETARY ALGORITHMS
+
+The Software includes proprietary algorithms and methodologies developed by 
+Clearglassinc, including but not limited to:
+
+   a) Clearglassinc Score calculation methodology
+   b) Predictive modeling algorithms
+   c) Data aggregation techniques
+   d) Analysis frameworks
+
+These algorithms are trade secrets and are protected by copyright law. 
+Licensee agrees to maintain the confidentiality of these algorithms and not 
+to disclose them to any third party.
+
+5. DATA AND PRIVACY
+
+   a) Licensee retains ownership of all data collected using the Software
+   
+   b) Licensor may collect anonymized usage statistics for product improvement
+   
+   c) Licensee is responsible for compliance with all applicable data privacy 
+      laws (GDPR, CCPA, etc.)
+   
+   d) Licensor does not claim ownership of any data processed by the Software
+
+6. SUPPORT AND MAINTENANCE
+
+   a) Licensor will provide technical support for 12 months from purchase date
+   
+   b) Support includes:
+      - Email and phone support during business hours
+      - Bug fixes and patches
+      - Minor version updates (e.g., 2.0 to 2.1)
+   
+   c) Support can be renewed annually for an additional fee
+   
+   d) Major version updates (e.g., 2.0 to 3.0) may require additional license fees
+
+7. LIMITED WARRANTY
+
+   a) Licensor warrants that the Software will perform substantially in accordance 
+      with the accompanying documentation for 90 days from purchase
+   
+   b) Licensor's entire liability and Licensee's exclusive remedy shall be, at 
+      Licensor's option:
+      - Repair or replacement of the Software
+      - Refund of the license fee paid
+
+   c) THIS WARRANTY IS EXCLUSIVE AND IN LIEU OF ALL OTHER WARRANTIES, WHETHER 
+      EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+      PARTICULAR PURPOSE, AND NON-INFRINGEMENT
+
+8. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
+
+   a) IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, 
+      CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO THIS 
+      AGREEMENT OR THE USE OF THE SOFTWARE
+   
+   b) LICENSOR'S TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT PAID BY LICENSEE FOR 
+      THE SOFTWARE LICENSE
+   
+   c) LICENSOR IS NOT LIABLE FOR ANY DAMAGES RESULTING FROM:
+      - Data loss or corruption
+      - Investment decisions made based on Software outputs
+      - Third-party API failures or data inaccuracies
+      - Unauthorized access to Licensee's systems
+
+9. TERM AND TERMINATION
+
+   a) This Agreement is effective until terminated
+   
+   b) Licensee may terminate this Agreement at any time by destroying all copies 
+      of the Software
+   
+   c) This Agreement will terminate immediately without notice if Licensee fails 
+      to comply with any provision
+   
+   d) Upon termination, Licensee must:
+      - Cease all use of the Software
+      - Destroy all copies of the Software
+      - Return or destroy all documentation
+   
+   e) Sections 3, 4, 7, 8, 10, and 11 survive termination
+
+10. CONFIDENTIALITY
+
+   a) Licensee acknowledges that the Software contains confidential and proprietary 
+      information of Licensor
+   
+   b) Licensee agrees to:
+      - Maintain the confidentiality of the Software
+      - Not disclose the Software to any third party
+      - Limit access to authorized users only
+   
+   c) This obligation survives termination of this Agreement
+
+11. GENERAL PROVISIONS
+
+   a) GOVERNING LAW: This Agreement shall be governed by the laws of the State of 
+      Delaware, United States, without regard to conflict of law principles
+   
+   b) DISPUTE RESOLUTION: Any disputes arising from this Agreement shall be 
+      resolved through binding arbitration in accordance with the rules of the 
+      American Arbitration Association
+   
+   c) ENTIRE AGREEMENT: This Agreement constitutes the entire agreement between 
+      the parties and supersedes all prior agreements and understandings
+   
+   d) AMENDMENTS: This Agreement may only be amended in writing signed by both 
+      parties
+   
+   e) SEVERABILITY: If any provision is found invalid or unenforceable, the 
+      remaining provisions shall remain in full force
+   
+   f) WAIVER: Failure to enforce any provision does not constitute a waiver of 
+      that provision
+   
+   g) ASSIGNMENT: Licensee may not assign this Agreement without prior written 
+      consent from Licensor
+   
+   h) EXPORT COMPLIANCE: Licensee agrees to comply with all applicable export 
+      laws and regulations
+
+12. API TERMS
+
+   a) Third-party APIs (LinkedIn, Crunchbase, etc.) are subject to their own 
+      terms of service
+   
+   b) Licensee is responsible for obtaining and maintaining API access
+   
+   c) Licensor is not responsible for third-party API changes or discontinuation
+
+13. UPDATES AND MODIFICATIONS
+
+   a) Licensor reserves the right to update this Agreement
+   
+   b) Continued use of the Software after updates constitutes acceptance of new 
+      terms
+   
+   c) Material changes will be communicated to Licensee via email
+
+═══════════════════════════════════════════════════════════════════════════
+
+ACCEPTANCE
+
+BY INSTALLING OR USING THE SOFTWARE, LICENSEE ACKNOWLEDGES THAT LICENSEE HAS 
+READ THIS AGREEMENT, UNDERSTANDS IT, AND AGREES TO BE BOUND BY ITS TERMS AND 
+CONDITIONS.
+
+═══════════════════════════════════════════════════════════════════════════
+
+CONTACT INFORMATION
+
+Clearglassinc
+123 Innovation Drive
+Tech City, TC 12345
+United States
+
+Email: legal@clearglassinc.com
+Phone: +1 (555) 123-4567
+Website: https://www.clearglassinc.com
+
+═══════════════════════════════════════════════════════════════════════════
+
+Copyright © 2025-2030 Clearglassinc. All rights reserved.
+
+Clearglassinc, the Clearglassinc logo, and Aerospace Intelligence System are 
+trademarks or registered trademarks of Clearglassinc in the United States and 
+other countries.
+
+All other trademarks are the property of their respective owners.
+
+═══════════════════════════════════════════════════════════════════════════
+
+END OF LICENSE AGREEMENT

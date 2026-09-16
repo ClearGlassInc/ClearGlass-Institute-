@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <title>CLEARGLASS // SENTINEL — Command Console</title>
+  <meta name="description" content="SENTINEL is ClearGlass Inc.'s defense-grade command console — an operational control layer for autonomous intelligence systems. Real-time oversight, predictive routing, and audited automation." />
+  <meta name="theme-color" content="#04060b" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CLEARGLASS // SENTINEL Command Console" />
+  <meta property="og:description" content="A defense-grade operational control layer for elite AI systems." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="assets/css/console.css" />
+  <link rel="stylesheet" href="assets/css/control-surface.css" />
+
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to console</a>
+
+  <!-- ============================ BACKGROUND FIELD ============================ -->
+  <div class="field" aria-hidden="true">
+    <div class="field__grid"></div>
+    <div class="field__bloom field__bloom--1"></div>
+    <div class="field__bloom field__bloom--2"></div>
+    <div class="field__bloom field__bloom--3"></div>
+    <div class="field__scan"></div>
+    <div class="field__vignette"></div>
+  </div>
+
+  <!-- ===================== CONTROL SURFACE v3.0 — STICKY BAR ===================== -->
+  <header class="cs-bar" data-cs-bar data-state="NOMINAL">
+    <div class="cs-bar__inner">
+      <a class="cs-brand" href="#main" aria-label="ClearGlass Sentinel home">
+        <svg class="cs-brand__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="bm" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0" stop-color="#34e3ea"/><stop offset=".5" stop-color="#2f6bff"/><stop offset="1" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 2 L35 11 V29 L20 38 L5 29 V11 Z" stroke="url(#bm)" stroke-width="1.6" fill="rgba(52,227,234,.06)"/>
+          <path d="M20 9 L29 14.5 V25.5 L20 31 L11 25.5 V14.5 Z" stroke="url(#bm)" stroke-width="1.2" opacity=".7"/>
+          <circle cx="20" cy="20" r="3.4" fill="url(#bm)"/>
+        </svg>
+        <span>
+          <span class="cs-brand__name">CLEAR<b>GLASS</b></span>
+          <span class="cs-brand__sub">CONTROL SURFACE v3.0</span>
+        </span>
+      </a>
+
+      <nav class="cs-nav" data-cs-nav aria-label="Primary">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#telemetry">Telemetry</a>
+        <a href="#systems">Systems</a>
+        <a href="#components">Components</a>
+        <a href="spec.html">Spec</a>
+      </nav>
+
+      <span class="cs-spacer"></span>
+
+      <button class="cs-cmdk" type="button" data-cs-open-palette aria-haspopup="dialog" aria-label="Open command palette">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <span class="cs-cmdk__hint">Search & commands</span>
+        <span class="cs-kbd">⌘K</span>
+      </button>
+
+      <button class="cs-iconbtn cs-status" type="button" data-cs-status data-state="NOMINAL"
+              data-cs-open-drawer aria-haspopup="dialog" aria-label="Open systems status drawer">
+        <span class="cs-dot"></span>
+        <span class="cs-status__label" data-cs-status-label>NOMINAL</span>
+      </button>
+
+      <span class="cs-status__clock" data-cs-clock>--:--:-- UTC</span>
+    </div>
+  </header>
+
+  <main id="main" class="shell">
+
+    <!-- ================================= HERO ================================= -->
+    <section class="section hero">
+      <div class="container hero__grid">
+        <div data-reveal>
+          <span class="eyebrow">Defense Grade Operations Layer</span>
+          <h1 class="hero__title">
+            Command the<br><span class="glx">autonomous</span> frontier.
+          </h1>
+          <p class="hero__lede">
+            SENTINEL is the control layer for elite AI systems — a real-time operations
+            console fusing predictive routing, audited automation, and total mission
+            oversight into a single, hardened surface.
+          </p>
+
+          <div class="hero__cta btn-row">
+            <a class="btn btn--command btn--lg" href="#systems">
+              <span class="btn__pip"></span>
+              <span class="btn__label">Initialize Console</span>
+            </a>
+            <a class="btn btn--ghost btn--lg btn--reticle" href="#capabilities">
+              <span class="btn__label">View Capabilities</span>
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+            </a>
+          </div>
+
+          <div class="hero__meta">
+            <div>
+              <span class="metric-value"><span data-count="99.99">0</span><small style="color:var(--cyan)">%</small></span>
+              <span class="label-mono">Uptime SLA</span>
+            </div>
+            <div>
+              <span class="metric-value"><span data-count="1.42">0</span><small style="color:var(--cyan)">M/s</small></span>
+              <span class="label-mono">Event Ingest</span>
+            </div>
+            <div>
+              <span class="metric-value"><span data-count="312">0</span><small style="color:var(--cyan)">ms</small></span>
+              <span class="label-mono">Decision Loop</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HUD console panel -->
+        <div class="hud glass glass--ticks glass--pulse" data-reveal data-delay="120" data-tilt>
+          <div class="hud__bar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="5"/></svg>
+            Live Operations Feed
+            <span class="dots"><i></i><i></i><i></i></span>
+          </div>
+          <div class="hud__body">
+            <div class="radar" aria-hidden="true">
+              <div class="radar__sweep"></div>
+              <div class="radar__blip" style="top:32%;left:62%"></div>
+              <div class="radar__blip" style="top:58%;left:40%;animation-delay:1.1s"></div>
+              <div class="radar__blip" style="top:46%;left:72%;animation-delay:2s"></div>
+            </div>
+
+            <div class="telemetry">
+              <div class="telemetry__row">
+                <span class="label-mono">Compute</span>
+                <span class="bar"><span data-fill="74"></span></span>
+                <span class="metric-value">74%</span>
+              </div>
+              <div class="telemetry__row">
+                <span class="label-mono">Inference</span>
+                <span class="bar bar--violet"><span data-fill="88"></span></span>
+                <span class="metric-value">88%</span>
+              </div>
+              <div class="telemetry__row">
+                <span class="label-mono">Integrity</span>
+                <span class="bar bar--green"><span data-fill="100"></span></span>
+                <span class="metric-value">OK</span>
+              </div>
+            </div>
+
+            <div class="btn-row" style="gap:10px">
+              <span class="chip chip--live"><span class="chip__dot"></span>Streaming</span>
+              <span class="chip chip--violet"><span class="chip__dot"></span>ARTEMIS</span>
+              <span class="chip chip--ok"><span class="chip__dot"></span>Secured</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== METRIC BAND ============================== -->
+    <section class="section" id="telemetry" style="padding-top:0">
+      <div class="container">
+        <div class="grid metrics">
+          <article class="metric glass frame--cut" data-reveal>
+            <div class="metric__head"><span class="label-mono">Active Nodes</span><span class="chip chip--live"><span class="chip__dot"></span>Live</span></div>
+            <div class="metric__num"><span data-count="248">0</span></div>
+            <div class="metric__delta up">▲ 12 since shift start</div>
+            <svg class="metric__spark" viewBox="0 0 120 36" preserveAspectRatio="none"><path d="M0 28 L15 24 L30 26 L45 18 L60 20 L75 12 L90 14 L105 6 L120 9"/></svg>
+          </article>
+          <article class="metric glass frame--cut" data-reveal data-delay="80">
+            <div class="metric__head"><span class="label-mono">Threats Neutralized</span><span class="chip chip--ok"><span class="chip__dot"></span>24h</span></div>
+            <div class="metric__num"><span data-count="1394">0</span></div>
+            <div class="metric__delta up">▲ 8.2% vs. prior cycle</div>
+            <svg class="metric__spark" viewBox="0 0 120 36" preserveAspectRatio="none"><path d="M0 30 L15 22 L30 24 L45 16 L60 18 L75 10 L90 13 L105 8 L120 4"/></svg>
+          </article>
+          <article class="metric glass frame--cut" data-reveal data-delay="160">
+            <div class="metric__head"><span class="label-mono">Mean Latency</span><span class="chip chip--warn"><span class="chip__dot"></span>Watch</span></div>
+            <div class="metric__num"><span data-count="42">0</span><small>ms</small></div>
+            <div class="metric__delta down">▼ 3ms auto-optimized</div>
+            <svg class="metric__spark" viewBox="0 0 120 36" preserveAspectRatio="none"><path d="M0 10 L15 14 L30 11 L45 18 L60 15 L75 22 L90 19 L105 24 L120 21"/></svg>
+          </article>
+          <article class="metric glass frame--cut" data-reveal data-delay="240">
+            <div class="metric__head"><span class="label-mono">Model Confidence</span><span class="chip chip--violet"><span class="chip__dot"></span>AI</span></div>
+            <div class="metric__num"><span data-count="0.991">0</span></div>
+            <div class="metric__delta up">▲ stable convergence</div>
+            <svg class="metric__spark" viewBox="0 0 120 36" preserveAspectRatio="none"><path d="M0 26 L15 20 L30 22 L45 14 L60 16 L75 11 L90 12 L105 8 L120 7"/></svg>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== CAPABILITIES ============================== -->
+    <section class="section" id="capabilities">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Operational Capabilities</span>
+          <h2>A single console for total mission control.</h2>
+          <p>Every subsystem is engineered for authority, auditability, and speed — built to run elite autonomous operations without ceding human oversight.</p>
+        </div>
+
+        <div class="grid cards">
+          <article class="card glass glass--ticks" data-reveal data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 L20 6 V12 C20 17 16 21 12 22 C8 21 4 17 4 12 V6 Z"/><path d="M9 12l2 2 4-4"/></svg></div>
+              <span class="chip chip--ok"><span class="chip__dot"></span>Hardened</span>
+            </div>
+            <h3>Zero-Trust Command</h3>
+            <p>Every action is authenticated, scoped, and sealed to an immutable audit ledger. No silent execution. Ever.</p>
+            <div class="card__foot"><span class="label-mono">AES-256 / GCM</span><span class="label-mono" style="color:var(--cyan)">SEC-01</span></div>
+          </article>
+
+          <article class="card glass glass--ticks" data-reveal data-delay="80" data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div>
+              <span class="chip chip--violet"><span class="chip__dot"></span>Autonomous</span>
+            </div>
+            <h3>Predictive Routing</h3>
+            <p>ARTEMIS agents forecast load, reroute around degradation, and converge on consensus in sub-second windows.</p>
+            <div class="card__foot"><span class="label-mono">312ms loop</span><span class="label-mono" style="color:var(--cyan)">AI-02</span></div>
+          </article>
+
+          <article class="card glass glass--ticks" data-reveal data-delay="160" data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div>
+              <span class="chip chip--live"><span class="chip__dot"></span>Streaming</span>
+            </div>
+            <h3>Real-Time Telemetry</h3>
+            <p>1.42M events/sec ingested, fused, and visualized as a live operational picture — no refresh, no lag.</p>
+            <div class="card__foot"><span class="label-mono">1.42M ev/s</span><span class="label-mono" style="color:var(--cyan)">TEL-03</span></div>
+          </article>
+
+          <article class="card glass glass--ticks" data-reveal data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+              <span class="chip chip--ok"><span class="chip__dot"></span>Sealed</span>
+            </div>
+            <h3>Immutable Audit</h3>
+            <p>Cryptographically chained event ledger. Every decision is reconstructable, attributable, and tamper-evident.</p>
+            <div class="card__foot"><span class="label-mono">Block #48,213</span><span class="label-mono" style="color:var(--cyan)">AUD-04</span></div>
+          </article>
+
+          <article class="card glass glass--ticks" data-reveal data-delay="80" data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg></div>
+              <span class="chip chip--warn"><span class="chip__dot"></span>Adaptive</span>
+            </div>
+            <h3>Simulation Grid</h3>
+            <p>Run adversarial scenarios against live models. Converge, validate, and promote — all before deployment.</p>
+            <div class="card__foot"><span class="label-mono">312ms converge</span><span class="label-mono" style="color:var(--cyan)">SIM-05</span></div>
+          </article>
+
+          <article class="card glass glass--ticks" data-reveal data-delay="160" data-tilt>
+            <div class="card__top">
+              <div class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v6H4zM4 14h16v6H4z"/><path d="M8 7h.01M8 17h.01"/></svg></div>
+              <span class="chip chip--ok"><span class="chip__dot"></span>Federated</span>
+            </div>
+            <h3>Edge Orchestration</h3>
+            <p>Coordinate distributed nodes across regions with self healing failover and hot model hot swaps.</p>
+            <div class="card__foot"><span class="label-mono">248 nodes</span><span class="label-mono" style="color:var(--cyan)">ORC-06</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================== SYSTEMS / LOG =============================== -->
+    <section class="section" id="systems">
+      <div class="container grid" style="grid-template-columns: 1.1fr 1fr; align-items:start; gap:clamp(20px,3vw,40px)">
+        <div class="trace glass glass--stealth" data-reveal>
+          <div class="trace__head">
+            <span class="chip chip--live"><span class="chip__dot"></span>Live</span>
+            <h3>System Event Stream</h3>
+          </div>
+          <div class="log" data-log aria-live="polite" aria-label="Live system event log"></div>
+        </div>
+
+        <div data-reveal data-delay="120">
+          <span class="eyebrow">Operational Posture</span>
+          <h2 class="section-head" style="margin-bottom:18px;font-size:clamp(1.7rem,3.4vw,2.6rem)">The system never sleeps. Neither does its memory.</h2>
+          <p class="dim" style="margin-bottom:24px">Watch the kernel work. Every handshake, rotation, and consensus event is streamed, classified, and sealed in real time — the same feed your operators command from.</p>
+
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
+            <div class="glass frame--cut" style="padding:18px">
+              <span class="label-mono">Encryption</span>
+              <div class="metric-value" style="font-size:1.1rem;margin-top:8px">AES-256/GCM</div>
+              <span class="chip chip--ok" style="margin-top:12px"><span class="chip__dot"></span>Rotating</span>
+            </div>
+            <div class="glass frame--cut" style="padding:18px">
+              <span class="label-mono">Model Build</span>
+              <div class="metric-value" style="font-size:1.1rem;margin-top:8px">v10.1 PROMETHEUS</div>
+              <span class="chip chip--violet" style="margin-top:12px"><span class="chip__dot"></span>Hot-swap</span>
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top:24px">
+            <button class="btn btn--secondary" data-loading-demo>
+              <span class="btn__spinner"></span>
+              <span class="btn__label">Run Diagnostic</span>
+            </button>
+            <button class="btn btn--ghost btn--sm">Export Ledger</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ COMPONENT LIBRARY ============================ -->
+    <section class="section" id="components">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">Interface System</span>
+          <h2>A reusable command vocabulary.</h2>
+          <p>One coherent set of controls, chips, and panels — engineered for clarity under pressure. Drop them anywhere; they always speak the same language.</p>
+        </div>
+
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr))">
+          <!-- Buttons -->
+          <div class="glass module" data-reveal>
+            <span class="module__no">// CTRL-01</span>
+            <h3>Action Controls</h3>
+            <p class="dim" style="margin-bottom:18px">Five variants, layered hover energy, and depth-aware click ripple.</p>
+            <div class="btn-row" style="gap:12px">
+              <button class="btn btn--primary">Primary</button>
+              <button class="btn btn--secondary">Secondary</button>
+              <button class="btn btn--ghost">Ghost</button>
+              <button class="btn btn--danger">Abort</button>
+            </div>
+            <div class="btn-row" style="gap:12px;margin-top:14px">
+              <button class="btn btn--command"><span class="btn__pip"></span><span class="btn__label">Command</span></button>
+              <button class="btn btn--ghost btn--sm">Small</button>
+              <button class="btn btn--ghost" disabled>Disabled</button>
+            </div>
+          </div>
+
+          <!-- Chips -->
+          <div class="glass module" data-reveal data-delay="80">
+            <span class="module__no">// CTRL-02</span>
+            <h3>Status Chips</h3>
+            <p class="dim" style="margin-bottom:18px">Glanceable system state with pulsing signal dots.</p>
+            <div class="btn-row" style="gap:10px">
+              <span class="chip chip--ok"><span class="chip__dot"></span>Operational</span>
+              <span class="chip chip--live"><span class="chip__dot"></span>Streaming</span>
+              <span class="chip chip--warn"><span class="chip__dot"></span>Degraded</span>
+              <span class="chip chip--crit"><span class="chip__dot"></span>Critical</span>
+              <span class="chip chip--violet"><span class="chip__dot"></span>AI Active</span>
+              <span class="chip"><span class="chip__dot"></span>Standby</span>
+            </div>
+          </div>
+
+          <!-- Action bar / stealth -->
+          <div class="glass glass--stealth module" data-reveal data-delay="160">
+            <span class="module__no">// CTRL-03</span>
+            <h3>Stealth Action Bar</h3>
+            <p class="dim" style="margin-bottom:18px">Low-chroma glass variant for dense operational surfaces.</p>
+            <div class="glass frame--cut" style="padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <span class="chip chip--ok"><span class="chip__dot"></span>Armed</span>
+              <span class="label-mono" style="margin-right:auto">SECTOR 7-G</span>
+              <button class="btn btn--ghost btn--sm">Hold</button>
+              <button class="btn btn--primary btn--sm">Deploy</button>
+            </div>
+            <ul style="margin-top:18px">
+              <li>GPU-accelerated motion</li>
+              <li>Respects reduced-motion</li>
+              <li>Accessible focus states</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================ CTA BAND ================================ -->
+    <section class="section cta-band">
+      <div class="container" data-reveal>
+        <div class="glass glass--pulse frame--cut">
+          <span class="eyebrow" style="justify-content:center">Deploy SENTINEL</span>
+          <h2>Take command of the systems you can't afford to lose.</h2>
+          <p>Stand up a hardened operations layer over your autonomous fleet in days — not quarters. Full audit, full oversight, full speed.</p>
+          <div class="btn-row">
+            <a class="btn btn--command btn--lg" href="spec.html"><span class="btn__pip"></span><span class="btn__label">Read the Spec</span></a>
+            <a class="btn btn--ghost btn--lg" href="https://github.com/clearglassinc/opal-koboi"><span class="btn__label">View Repository</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================================= FOOTER ================================= -->
+  <footer class="foot">
+    <div class="container">
+      <div class="foot__grid">
+        <div class="foot__col" style="max-width:320px">
+          <a class="brand" href="#main" style="margin-bottom:14px">
+            <svg class="brand__mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path d="M20 2 L35 11 V29 L20 38 L5 29 V11 Z" stroke="url(#bm)" stroke-width="1.6" fill="rgba(52,227,234,.06)"/>
+              <circle cx="20" cy="20" r="3.4" fill="url(#bm)"/>
+            </svg>
+            <span class="brand__name">CLEAR<span>GLASS</span></span>
+          </a>
+          <p class="dim" style="font-size:.88rem">The operational control layer for elite autonomous intelligence systems.</p>
+        </div>
+        <div class="foot__col">
+          <h4>System</h4>
+          <a href="#capabilities">Capabilities</a>
+          <a href="#telemetry">Telemetry</a>
+          <a href="#systems">Event Stream</a>
+          <a href="#components">Components</a>
+        </div>
+        <div class="foot__col">
+          <h4>Resources</h4>
+          <a href="spec.html">Specification</a>
+          <a href="docs/RUNBOOK.md">Runbook</a>
+          <a href="README.md">Readme</a>
+          <a href="docs/clearglass-nexus-v10.1-prometheus.html">Nexus v10.1</a>
+        </div>
+        <div class="foot__col">
+          <h4>Status</h4>
+          <p class="label-mono" style="color:var(--green)">▸ All systems operational</p>
+          <p class="label-mono" style="margin-top:8px">Build PROMETHEUS-10.1</p>
+          <p class="label-mono" style="margin-top:8px" data-clock>--:--:-- UTC</p>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <p>© 2026 CLEARGLASS INC. — SENTINEL OPERATIONS LAYER</p>
+        <p>CLASSIFIED // OPERATIONAL — AUTHORIZED ACCESS ONLY</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== CONTROL SURFACE — COMMAND PALETTE ===================== -->
+  <div class="cs-palette" data-cs-palette role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+    <div class="cs-palette__panel" role="document">
+      <div class="cs-palette__search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input class="cs-palette__input" data-cs-palette-input type="text" role="combobox"
+               aria-expanded="false" aria-controls="cs-cmd-list" aria-autocomplete="list"
+               aria-label="Search destinations and commands"
+               placeholder="Search destinations and commands…" autocomplete="off" spellcheck="false" />
+      </div>
+      <ul class="cs-palette__list" id="cs-cmd-list" data-cs-palette-list role="listbox" aria-label="Commands"></ul>
+      <p class="cs-palette__empty" data-cs-palette-empty hidden>No matching command.</p>
+      <div class="cs-palette__foot">
+        <span><span class="cs-kbd">↑</span><span class="cs-kbd">↓</span> navigate</span>
+        <span><span class="cs-kbd">↵</span> run</span>
+        <span><span class="cs-kbd">esc</span> close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONTROL SURFACE — SYSTEMS DRAWER ===================== -->
+  <div class="cs-scrim" data-cs-scrim hidden></div>
+  <aside class="cs-drawer" data-cs-drawer role="dialog" aria-modal="true" aria-labelledby="cs-drawer-title" hidden>
+    <div class="cs-drawer__head">
+      <span class="cs-dot cs-dot--pulse" aria-hidden="true"></span>
+      <span>
+        <span class="cs-drawer__title" id="cs-drawer-title">Systems Status</span>
+        <span class="cs-drawer__sub">ACTIONS · DEPLOYMENTS · LIVE TELEMETRY</span>
+      </span>
+      <button class="cs-iconbtn cs-drawer__close" type="button" data-cs-drawer-close aria-label="Close systems drawer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="cs-drawer__meta" data-cs-drawer-meta></div>
+    <div class="cs-drawer__body" data-cs-drawer-body></div>
+  </aside>
+
+  <!-- ===================== CONTROL SURFACE — MOBILE BOTTOM RAIL ===================== -->
+  <nav class="cs-rail" data-cs-rail aria-label="Mobile primary">
+    <div class="cs-rail__inner">
+      <a class="cs-rail__btn" href="#main" aria-current="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-8 9 8M5 9v11h14V9"/></svg>
+        Home
+      </a>
+      <a class="cs-rail__btn" href="#capabilities">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+        Caps
+      </a>
+      <button class="cs-rail__btn" type="button" data-cs-open-palette aria-label="Open command palette">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Command
+      </button>
+      <button class="cs-rail__btn cs-rail__btn--status" type="button" data-cs-rail-status data-state="NOMINAL"
+              data-cs-open-drawer aria-label="Open systems status drawer">
+        <span class="cs-dot" aria-hidden="true"></span>
+        <span data-cs-rail-status-label>Status</span>
+      </button>
+    </div>
+  </nav>
+
+  <script src="assets/js/console.js" defer></script>
+  <script src="assets/js/control-surface.js" defer></script>
+</body>
+</html>

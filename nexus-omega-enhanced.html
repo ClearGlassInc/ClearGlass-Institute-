@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>NEXUS OMEGA · Enhanced Command Center</title>
+  <style>
+    :root {
+      --bg: #04070d;
+      --bg-soft: #08121b;
+      --panel: rgba(8, 16, 27, 0.88);
+      --panel-2: rgba(11, 25, 38, 0.84);
+      --panel-3: rgba(7, 18, 29, 0.72);
+      --line: rgba(0, 255, 200, 0.16);
+      --line-strong: rgba(0, 255, 200, 0.33);
+      --text: #e9f8ff;
+      --muted: #8ca3b8;
+      --good: #18ffb2;
+      --warn: #ffbe55;
+      --bad: #ff4d8d;
+      --info: #68c8ff;
+      --violet: #a275ff;
+      --cyan: #00ffc8;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+      --radius: 20px;
+      --radius-lg: 28px;
+      --radius-sm: 14px;
+      --blur: blur(18px);
+      --tr: 180ms ease;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(0, 255, 200, 0.08), transparent 25%),
+        radial-gradient(circle at top right, rgba(162, 117, 255, 0.08), transparent 24%),
+        linear-gradient(180deg, #071019 0%, #03070d 100%);
+      color: var(--text);
+      font-family: var(--font);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px),
+        repeating-linear-gradient(0deg, rgba(0,255,200,0.02) 0px, rgba(0,255,200,0.02) 2px, transparent 2px, transparent 7px);
+      background-size: 40px 40px, 40px 40px, auto;
+      mix-blend-mode: screen;
+      opacity: 0.6;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      grid-template-rows: 78px 1fr;
+      grid-template-areas:
+        "top top"
+        "nav main";
+      height: 100%;
+    }
+
+    .topbar {
+      grid-area: top;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(4, 11, 18, 0.82);
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(0,255,200,0.16), rgba(162,117,255,0.16));
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 0 18px rgba(0,255,200,0.15);
+      font-size: 1.2rem;
+    }
+
+    .brand-copy { min-width: 0; }
+    .brand-copy h1 {
+      font-size: 1.05rem;
+      letter-spacing: 1.4px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: linear-gradient(135deg, #ffffff 0%, #bafef2 35%, #a88bff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .brand-copy p {
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip,
+    .btn,
+    .seg button,
+    .nav-btn,
+    .pill,
+    .incident button,
+    .query-send {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      transition: var(--tr);
+    }
+
+    .chip, .pill {
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.74rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 12px var(--good);
+      animation: pulse 1.4s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(0.8); opacity: 0.65; }
+      to { transform: scale(1.25); opacity: 1; }
+    }
+
+    .btn,
+    .query-send,
+    .seg button,
+    .incident button,
+    .nav-btn {
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    .btn:hover,
+    .query-send:hover,
+    .seg button:hover,
+    .incident button:hover,
+    .nav-btn:hover,
+    .chip:hover {
+      border-color: var(--line-strong);
+      background: rgba(0,255,200,0.08);
+      box-shadow: 0 0 0 1px rgba(0,255,200,0.08) inset;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(0,255,200,0.18), rgba(104,200,255,0.12));
+      border-color: rgba(0,255,200,0.4);
+    }
+
+    .nav {
+      grid-area: nav;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 10px;
+      border-right: 1px solid var(--line);
+      background: rgba(4, 10, 16, 0.82);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      position: relative;
+    }
+
+    .nav-btn.active {
+      background: rgba(0,255,200,0.12);
+      border-color: rgba(0,255,200,0.4);
+      box-shadow: 0 0 20px rgba(0,255,200,0.12);
+    }
+
+    .nav-btn.active::after {
+      content: "";
+      position: absolute;
+      left: -10px;
+      width: 3px;
+      height: 30px;
+      border-radius: 3px;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+    }
+
+    .main {
+      grid-area: main;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      min-height: 0;
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      backdrop-filter: var(--blur);
+      box-shadow: var(--shadow);
+      min-height: 0;
+    }
+
+    .row { display: flex; gap: 14px; min-height: 0; }
+    .col { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(130px, 1fr));
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .kpi {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      min-width: 140px;
+    }
+
+    .kpi h3 {
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: 1.65rem;
+      line-height: 1;
+      margin-bottom: 8px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+
+    .kpi span { font-size: 0.76rem; color: var(--muted); }
+    .trend-up { color: var(--good); }
+    .trend-down { color: var(--bad); }
+    .trend-warn { color: var(--warn); }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(380px, 1.75fr) minmax(280px, 0.95fr);
+      gap: 14px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .map-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title h2 {
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .panel-title p {
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-top: 4px;
+    }
+
+    .seg {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seg button {
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.75rem;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .seg button.active {
+      background: rgba(0,255,200,0.12);
+      border-color: rgba(0,255,200,0.38);
+      color: #d9fff6;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 0 16px 12px;
+      border-bottom: 1px solid rgba(0,255,200,0.08);
+    }
+
+    .map-shell {
+      position: relative;
+      padding: 16px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .legend {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(3, 10, 15, 0.76);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+      min-width: 160px;
+      z-index: 3;
+    }
+
+    .legend .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .map-canvas {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      background:
+        radial-gradient(circle at center, rgba(0,255,200,0.05), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0));
+      border: 1px solid rgba(0,255,200,0.06);
+      border-radius: 24px;
+    }
+
+    .map-footer {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+
+    .microstat {
+      background: var(--panel-3);
+      border: 1px solid rgba(0,255,200,0.08);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .microstat h4 {
+      font-size: 0.69rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      margin-bottom: 8px;
+    }
+
+    .microstat strong {
+      font-size: 1.08rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-stack {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(220px, 0.9fr) minmax(200px, 0.7fr) minmax(220px, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .advisor,
+    .scenario,
+    .feed {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .list {
+      padding: 12px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .insight,
+    .incident,
+    .feed-item {
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-left: 3px solid var(--info);
+      border-radius: 16px;
+      padding: 12px;
+      transition: var(--tr);
+    }
+
+    .insight:hover,
+    .incident:hover,
+    .feed-item:hover {
+      transform: translateX(4px);
+      border-color: rgba(0,255,200,0.14);
+      background: rgba(10, 31, 44, 0.88);
+    }
+
+    .insight h3,
+    .incident h3,
+    .feed-item h3 {
+      font-size: 0.87rem;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .meta,
+    .submeta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .meta .score {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .query-box {
+      padding: 0 12px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      border-top: 1px solid rgba(0,255,200,0.08);
+    }
+
+    .query-box input,
+    .settings-grid input,
+    .settings-grid select,
+    .settings-grid textarea {
+      background: rgba(0,0,0,0.36);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      font: inherit;
+    }
+
+    .query-box input:focus,
+    .settings-grid input:focus,
+    .settings-grid select:focus,
+    .settings-grid textarea:focus {
+      border-color: rgba(0,255,200,0.4);
+      box-shadow: 0 0 0 3px rgba(0,255,200,0.08);
+    }
+
+    .scenario-body {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      overflow: auto;
+    }
+
+    .scenario-card {
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .scenario-card h3 {
+      font-size: 0.84rem;
+    }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 64px 1fr 44px;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .track {
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      width: 0;
+      transition: width 400ms ease;
+    }
+
+    .feed .list { padding-top: 14px; }
+    .feed-item { border-left-color: var(--warn); }
+    .feed-item small { color: var(--muted); display: block; margin-top: 6px; }
+
+    .lower-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.4fr) minmax(260px, 0.8fr) minmax(260px, 0.8fr);
+      gap: 14px;
+      min-height: 220px;
+      overflow: hidden;
+    }
+
+    .chart-panel,
+    .risk-panel,
+    .command-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .chart-wrap,
+    .risk-wrap,
+    .command-wrap {
+      padding: 14px 16px 16px;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .risk-box {
+      border: 1px solid rgba(0,255,200,0.08);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .risk-box h3 {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 10px;
+    }
+
+    .ring {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--cyan) var(--deg, 50%), rgba(255,255,255,0.05) 0);
+      position: relative;
+    }
+
+    .ring::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      background: rgba(4, 11, 18, 0.95);
+      border-radius: 50%;
+      border: 1px solid rgba(0,255,200,0.08);
+    }
+
+    .ring strong {
+      position: relative;
+      z-index: 1;
+      font-size: 1.2rem;
+    }
+
+    .command-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .terminal {
+      flex: 1;
+      min-height: 120px;
+      overflow: auto;
+      background: rgba(1, 7, 12, 0.86);
+      border: 1px solid rgba(0,255,200,0.08);
+      border-radius: 18px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .terminal .line { margin-bottom: 6px; color: #cde6f4; }
+    .terminal .stamp { color: var(--muted); margin-right: 8px; }
+    .terminal .ok { color: var(--good); }
+    .terminal .warn { color: var(--warn); }
+    .terminal .bad { color: var(--bad); }
+    .terminal .info { color: var(--info); }
+
+    .timeline {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 2px;
+    }
+
+    .timeline-item {
+      min-width: 220px;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: rgba(7, 20, 31, 0.9);
+      border: 1px solid rgba(0,255,200,0.08);
+      cursor: pointer;
+      transition: var(--tr);
+    }
+
+    .timeline-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0,255,200,0.25);
+      background: rgba(10, 29, 43, 0.95);
+    }
+
+    .timeline-item strong {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+
+    .timeline-item span {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .toast-zone {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 260px;
+      max-width: 360px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,255,200,0.24);
+      background: rgba(5, 14, 21, 0.88);
+      box-shadow: var(--shadow);
+      animation: slideIn 240ms ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .toast strong { display: block; margin-bottom: 4px; font-size: 0.82rem; }
+    .toast p { color: var(--muted); font-size: 0.75rem; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: none;
+      place-items: center;
+      z-index: 60;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: rgba(7, 16, 25, 0.94);
+      border: 1px solid rgba(0,255,200,0.18);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-body { padding: 18px; }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 0.76rem; color: var(--muted); }
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 16px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1280px) {
+      .kpis { grid-template-columns: repeat(4, minmax(140px, 1fr)); }
+      .workspace-grid { grid-template-columns: 1fr; }
+      .sidebar-stack { grid-template-rows: auto auto auto; }
+      .lower-grid { grid-template-columns: 1fr; }
+      .map-footer { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 78px auto 1fr;
+        grid-template-areas:
+          "top"
+          "nav"
+          "main";
+      }
+      .nav {
+        flex-direction: row;
+        justify-content: flex-start;
+        overflow-x: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+      }
+      .nav-btn.active::after { display: none; }
+      .settings-grid,
+      .scenario-body,
+      .risk-grid,
+      .map-footer { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">⚡</div>
+        <div class="brand-copy">
+          <h1>NEXUS OMEGA · Enhanced Intelligence Command Center</h1>
+          <p>Realtime anomaly fusion · digital twin · adaptive response fabric</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="chip"><span class="pulse"></span><span id="systemStateText">SYSTEM STATE · COHERENT</span></div>
+        <div class="chip">⚛️ Compute <strong id="computeValue">71%</strong></div>
+        <div class="chip">🛰️ Feed <strong id="ingestValue">1.24M/s</strong></div>
+        <button class="btn" id="pauseBtn">Pause Simulation</button>
+        <button class="btn primary" id="settingsBtn">System Settings</button>
+      </div>
+    </header>
+
+    <aside class="nav" id="domainNav"></aside>
+
+    <main class="main">
+      <section class="kpis" id="kpiGrid"></section>
+
+      <section class="workspace-grid">
+        <section class="panel map-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <h2>Operational Digital Twin</h2>
+              <p>Spatial correlation of transit, grid, security, environment, and logistics nodes</p>
+            </div>
+            <div class="seg" id="modeButtons"></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="pill">Mode: <strong id="activeModeLabel">CITY</strong></div>
+            <div class="pill">Selected Domain: <strong id="activeDomainLabel">SECURITY</strong></div>
+            <div class="pill">Threat Score: <strong id="threatLabel">42</strong></div>
+            <div class="pill">Open Incidents: <strong id="incidentCountLabel">0</strong></div>
+          </div>
+
+          <div class="map-shell">
+            <div class="legend" id="legendBox"></div>
+            <canvas class="map-canvas" id="mapCanvas" width="1200" height="640" aria-label="Operational digital twin map"></canvas>
+          </div>
+
+          <div class="map-footer" id="microStats"></div>
+        </section>
+
+        <section class="sidebar-stack">
+          <section class="panel advisor">
+            <div class="panel-head">
+              <div class="panel-title">
+                <h2>AI Advisor</h2>
+                <p>Ranked insights with confidence, impact, and routeable context</p>
+              </div>
+            </div>
+            <div class="list" id="insightList"></div>
+            <div class="query-box">
+              <input id="queryInput" type="text" placeholder="Ask: show threat matrix, route fleet, explain anomaly, stabilize zone 7" />
+              <button class="query-send" id="queryBtn">Run</button>
+            </div>
+          </section>
+
+          <section class="panel scenario">
+            <div class="panel-head">
+              <div class="panel-title">
+                <h2>Scenario Simulator</h2>
+                <p>Command options scored for speed, safety, cost, and sustainability</p>
+              </div>
+            </div>
+            <div class="scenario-body" id="scenarioGrid"></div>
+          </section>
+
+          <section class="panel feed">
+            <div class="panel-head">
+              <div class="panel-title">
+                <h2>Incident Feed</h2>
+                <p>Live alerts, operator notes, forecast bursts, and model escalations</p>
+              </div>
+            </div>
+            <div class="list" id="feedList"></div>
+          </section>
+        </section>
+      </section>
+
+      <section class="lower-grid">
+        <section class="panel chart-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <h2>Threat Trend Analytics</h2>
+              <p>Rolling model output across the last 24 sample intervals</p>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="trendCanvas" width="1000" height="280"></canvas>
+          </div>
+        </section>
+
+        <section class="panel risk-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <h2>Risk Profile</h2>
+              <p>Composite health scores by model confidence and operator readiness</p>
+            </div>
+          </div>
+          <div class="risk-wrap">
+            <div class="risk-grid" id="riskGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel command-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <h2>Command Log</h2>
+              <p>Detections, decisions, synthetic actions, and execution trace</p>
+            </div>
+          </div>
+          <div class="command-wrap">
+            <div class="terminal" id="terminal"></div>
+            <div class="timeline" id="timeline"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-zone" id="toastZone"></div>
+
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsHeading">
+      <div class="modal-head">
+        <div>
+          <h2 id="settingsHeading">System Settings</h2>
+          <p style="color: var(--muted); font-size: 0.78rem; margin-top: 4px;">Tune simulation, thresholds, labels, and UI behavior</p>
+        </div>
+        <button class="btn" id="closeSettingsBtn">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-grid">
+          <div class="field">
+            <label for="cityLabelInput">City Label</label>
+            <input id="cityLabelInput" type="text" value="Greater Metro Grid" />
+          </div>
+          <div class="field">
+            <label for="operatorInput">Operator Label</label>
+            <input id="operatorInput" type="text" value="Director · OPS" />
+          </div>
+          <div class="field">
+            <label for="baseThreatInput">Base Threat Bias</label>
+            <input id="baseThreatInput" type="number" min="0" max="100" value="40" />
+          </div>
+          <div class="field">
+            <label for="tickRateInput">Tick Interval (ms)</label>
+            <input id="tickRateInput" type="number" min="500" max="10000" step="100" value="1800" />
+          </div>
+          <div class="field">
+            <label for="modeSelect">Default Mode</label>
+            <select id="modeSelect">
+              <option value="city">City</option>
+              <option value="security">Security</option>
+              <option value="transit">Transit</option>
+              <option value="energy">Energy</option>
+              <option value="environment">Environment</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="domainSelect">Default Domain</label>
+            <select id="domainSelect"></select>
+          </div>
+          <div class="field full">
+            <label for="annotationInput">Operator Annotation</label>
+            <textarea id="annotationInput" rows="4">Maintain low false-positive rate during transit peak while preserving fast escalation for security anomalies.</textarea>
+          </div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="btn" id="resetSettingsBtn">Reset Defaults</button>
+          <button class="btn primary" id="saveSettingsBtn">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const storageKey = 'nexus-omega-enhanced-state-v1';
+
+      const defaults = {
+        cityLabel: 'Greater Metro Grid',
+        operatorLabel: 'Director · OPS',
+        baseThreatBias: 40,
+        tickRate: 1800,
+        mode: 'city',
+        domain: 'security',
+        annotation: 'Maintain low false-positive rate during transit peak while preserving fast escalation for security anomalies.'
+      };
+
+      const domainConfig = [
+        { id: 'security', icon: '🛡️', label: 'Security', color: '#ff4d8d' },
+        { id: 'transit', icon: '🚆', label: 'Transit', color: '#00ffc8' },
+        { id: 'logistics', icon: '📦', label: 'Logistics', color: '#ffbe55' },
+        { id: 'environment', icon: '🌿', label: 'Environment', color: '#77ff9b' },
+        { id: 'energy', icon: '⚡', label: 'Energy', color: '#68c8ff' },
+        { id: 'digital', icon: '🔄', label: 'Digital Twin', color: '#a275ff' },
+        { id: 'advisor', icon: '🧠', label: 'AI Advisor', color: '#d8fffb' }
+      ];
+
+      const modeConfig = [
+        { id: 'city', label: 'City' },
+        { id: 'security', label: 'Security' },
+        { id: 'transit', label: 'Transit' },
+        { id: 'energy', label: 'Energy' },
+        { id: 'environment', label: 'Environment' }
+      ];
+
+      const nodeSeeds = [
+        { id: 'hub-a', x: 0.16, y: 0.18, domain: 'transit', name: 'Hub A', criticality: 73, signal: 36 },
+        { id: 'zone-7', x: 0.33, y: 0.32, domain: 'security', name: 'Zone 7 Camera Mesh', criticality: 91, signal: 62 },
+        { id: 'depot-3', x: 0.52, y: 0.58, domain: 'logistics', name: 'Depot 3 Fleet Sync', criticality: 65, signal: 28 },
+        { id: 'air-north', x: 0.74, y: 0.24, domain: 'environment', name: 'Air Sentinel North', criticality: 48, signal: 19 },
+        { id: 'sub-12', x: 0.67, y: 0.11, domain: 'energy', name: 'Substation 12', criticality: 84, signal: 44 },
+        { id: 'core-dt', x: 0.43, y: 0.76, domain: 'digital', name: 'Twin Correlation Core', criticality: 77, signal: 31 },
+        { id: 'watch-south', x: 0.22, y: 0.71, domain: 'security', name: 'South Watch Cluster', criticality: 70, signal: 49 },
+        { id: 'rail-east', x: 0.84, y: 0.54, domain: 'transit', name: 'Rail East Junction', criticality: 58, signal: 23 },
+        { id: 'fleet-west', x: 0.10, y: 0.50, domain: 'logistics', name: 'Fleet West Spine', criticality: 66, signal: 35 },
+        { id: 'grid-core', x: 0.57, y: 0.38, domain: 'energy', name: 'Grid Core Relay', criticality: 86, signal: 41 }
+      ];
+
+      const links = [
+        ['hub-a', 'zone-7'],
+        ['zone-7', 'grid-core'],
+        ['grid-core', 'sub-12'],
+        ['grid-core', 'depot-3'],
+        ['depot-3', 'rail-east'],
+        ['fleet-west', 'hub-a'],
+        ['fleet-west', 'watch-south'],
+        ['watch-south', 'core-dt'],
+        ['core-dt', 'depot-3'],
+        ['air-north', 'sub-12'],
+        ['air-north', 'grid-core'],
+        ['zone-7', 'watch-south']
+      ];
+
+      const kpiTemplates = [
+        { key: 'uptime', label: 'Network Uptime', value: 99.982, suffix: '%', decimals: 3, trend: 'up' },
+        { key: 'resolution', label: 'Incident Resolution', value: 4.6, suffix: ' min', decimals: 1, trend: 'down' },
+        { key: 'alerts', label: 'Active Alerts', value: 12, suffix: '', decimals: 0, trend: 'warn' },
+        { key: 'co2', label: 'CO₂ PPM', value: 411, suffix: '', decimals: 0, trend: 'warn' },
+        { key: 'transit', label: 'Transit Efficiency', value: 88, suffix: '%', decimals: 0, trend: 'up' },
+        { key: 'energy', label: 'Energy Load', value: 1.39, suffix: ' GW', decimals: 2, trend: 'warn' },
+        { key: 'confidence', label: 'Model Confidence', value: 92, suffix: '%', decimals: 0, trend: 'up' },
+        { key: 'latency', label: 'Signal Latency', value: 84, suffix: ' ms', decimals: 0, trend: 'down' }
+      ];
+
+      const scenarioTemplates = [
+        {
+          id: 'stabilize',
+          title: 'Stabilize Corridor',
+          desc: 'Raise safety weighting, slow non-essential flows, deploy patrol verification.',
+          metrics: { speed: 54, safety: 93, cost: 61, sustain: 58 }
+        },
+        {
+          id: 'optimize',
+          title: 'Optimize Throughput',
+          desc: 'Reduce congestion, reroute fleet, compress signal cycles, preserve service continuity.',
+          metrics: { speed: 89, safety: 66, cost: 73, sustain: 64 }
+        },
+        {
+          id: 'conserve',
+          title: 'Conserve Energy',
+          desc: 'Protect grid margin, flatten peaks, favor lower-emission routing across the twin.',
+          metrics: { speed: 63, safety: 72, cost: 79, sustain: 94 }
+        },
+        {
+          id: 'surgical',
+          title: 'Surgical Response',
+          desc: 'Narrow intervention on highest-confidence nodes to reduce collateral disruption.',
+          metrics: { speed: 76, safety: 87, cost: 84, sustain: 74 }
+        }
+      ];
+
+      const state = {
+        settings: loadSettings(),
+        running: true,
+        nodes: clone(nodeSeeds),
+        timeline: [],
+        feed: [],
+        insights: [],
+        trendSeries: [],
+        selectedNodeId: null,
+        activeScenario: 'surgical',
+        hoverNodeId: null,
+        cycle: 0,
+        timer: null
+      };
+
+      const el = {
+        domainNav: document.getElementById('domainNav'),
+        modeButtons: document.getElementById('modeButtons'),
+        kpiGrid: document.getElementById('kpiGrid'),
+        legendBox: document.getElementById('legendBox'),
+        microStats: document.getElementById('microStats'),
+        insightList: document.getElementById('insightList'),
+        scenarioGrid: document.getElementById('scenarioGrid'),
+        feedList: document.getElementById('feedList'),
+        terminal: document.getElementById('terminal'),
+        timeline: document.getElementById('timeline'),
+        mapCanvas: document.getElementById('mapCanvas'),
+        trendCanvas: document.getElementById('trendCanvas'),
+        queryInput: document.getElementById('queryInput'),
+        queryBtn: document.getElementById('queryBtn'),
+        riskGrid: document.getElementById('riskGrid'),
+        threatLabel: document.getElementById('threatLabel'),
+        incidentCountLabel: document.getElementById('incidentCountLabel'),
+        activeModeLabel: document.getElementById('activeModeLabel'),
+        activeDomainLabel: document.getElementById('activeDomainLabel'),
+        pauseBtn: document.getElementById('pauseBtn'),
+        settingsBtn: document.getElementById('settingsBtn'),
+        settingsModal: document.getElementById('settingsModal'),
+        closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+        resetSettingsBtn: document.getElementById('resetSettingsBtn'),
+        saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+        modeSelect: document.getElementById('modeSelect'),
+        domainSelect: document.getElementById('domainSelect'),
+        cityLabelInput: document.getElementById('cityLabelInput'),
+        operatorInput: document.getElementById('operatorInput'),
+        baseThreatInput: document.getElementById('baseThreatInput'),
+        tickRateInput: document.getElementById('tickRateInput'),
+        annotationInput: document.getElementById('annotationInput'),
+        systemStateText: document.getElementById('systemStateText'),
+        computeValue: document.getElementById('computeValue'),
+        ingestValue: document.getElementById('ingestValue'),
+        toastZone: document.getElementById('toastZone')
+      };
+
+      const mapCtx = el.mapCanvas.getContext('2d');
+      const trendCtx = el.trendCanvas.getContext('2d');
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          return raw ? { ...defaults, ...JSON.parse(raw) } : { ...defaults };
+        } catch {
+          return { ...defaults };
+        }
+      }
+
+      function saveSettings() {
+        localStorage.setItem(storageKey, JSON.stringify(state.settings));
+      }
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function pick(list) {
+        return list[Math.floor(Math.random() * list.length)];
+      }
+
+      function formatNumber(value, decimals = 0) {
+        return Number(value).toFixed(decimals);
+      }
+
+      function formatTime(date = new Date()) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+
+      function logLine(message, level = 'info') {
+        const line = document.createElement('div');
+        line.className = 'line';
+        line.innerHTML = `<span class="stamp">${formatTime()}</span><span class="${level}">${message}</span>`;
+        el.terminal.prepend(line);
+        while (el.terminal.children.length > 40) el.terminal.removeChild(el.terminal.lastChild);
+      }
+
+      function toast(title, message) {
+        const node = document.createElement('div');
+        node.className = 'toast';
+        node.innerHTML = `<strong>${title}</strong><p>${message}</p>`;
+        el.toastZone.appendChild(node);
+        setTimeout(() => node.remove(), 2800);
+      }
+
+      function getDomainColor(domainId) {
+        return domainConfig.find(d => d.id === domainId)?.color || '#68c8ff';
+      }
+
+      function threatScore() {
+        const nodePressure = state.nodes.reduce((sum, node) => sum + node.signal * (node.criticality / 100), 0) / state.nodes.length;
+        const bias = Number(state.settings.baseThreatBias || 0);
+        return clamp(Math.round(nodePressure + bias * 0.45), 0, 100);
+      }
+
+      function activeIncidents() {
+        return state.feed.filter(item => item.severity !== 'info').slice(0, 12);
+      }
+
+      function renderNav() {
+        el.domainNav.innerHTML = '';
+        domainConfig.forEach(domain => {
+          const btn = document.createElement('button');
+          btn.className = `nav-btn ${state.settings.domain === domain.id ? 'active' : ''}`;
+          btn.type = 'button';
+          btn.title = domain.label;
+          btn.dataset.domain = domain.id;
+          btn.textContent = domain.icon;
+          btn.addEventListener('click', () => {
+            state.settings.domain = domain.id;
+            renderNav();
+            renderStaticLabels();
+            renderInsights();
+            drawMap();
+            renderFeed();
+            logLine(`Domain focus switched to ${domain.label}.`, 'info');
+          });
+          el.domainNav.appendChild(btn);
+        });
+      }
+
+      function renderModes() {
+        el.modeButtons.innerHTML = '';
+        modeConfig.forEach(mode => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = mode.label.toUpperCase();
+          btn.className = state.settings.mode === mode.id ? 'active' : '';
+          btn.addEventListener('click', () => {
+            state.settings.mode = mode.id;
+            renderModes();
+            renderStaticLabels();
+            drawMap();
+            logLine(`Map mode changed to ${mode.label}.`, 'info');
+          });
+          el.modeButtons.appendChild(btn);
+        });
+      }
+
+      function renderKpis() {
+        el.kpiGrid.innerHTML = '';
+        const drift = state.cycle;
+        kpiTemplates.forEach(item => {
+          const value = deriveKpiValue(item, drift);
+          const div = document.createElement('article');
+          div.className = 'kpi';
+          div.innerHTML = `
+            <h3>${item.label}</h3>
+            <strong>${formatNumber(value, item.decimals)}${item.suffix}</strong>
+            <span class="${trendClass(item.trend)}">${trendText(item, value)}</span>
+          `;
+          el.kpiGrid.appendChild(div);
+        });
+      }
+
+      function deriveKpiValue(item, drift) {
+        const wobble = Math.sin((drift + item.key.length) / 3.6);
+        switch (item.key) {
+          case 'uptime': return clamp(item.value + wobble * 0.012, 99.91, 99.999);
+          case 'resolution': return clamp(item.value + wobble * 0.6, 2.2, 7.3);
+          case 'alerts': return activeIncidents().length + Math.max(0, Math.round(wobble * 2));
+          case 'co2': return 409 + Math.round(wobble * 5 + rand(-2, 2));
+          case 'transit': return clamp(86 + wobble * 4 + rand(-1, 1), 72, 96);
+          case 'energy': return clamp(1.35 + wobble * 0.14, 1.08, 1.82);
+          case 'confidence': return clamp(90 + wobble * 4, 76, 99);
+          case 'latency': return clamp(82 + wobble * 12 + rand(-6, 6), 54, 132);
+          default: return item.value;
+        }
+      }
+
+      function trendClass(trend) {
+        return trend === 'up' ? 'trend-up' : trend === 'down' ? 'trend-down' : 'trend-warn';
+      }
+
+      function trendText(item, value) {
+        if (item.key === 'alerts') return `${value <= 8 ? 'Contained' : value <= 14 ? 'Elevated' : 'Escalating'} signal pressure`;
+        if (item.key === 'resolution') return `${value < 4.5 ? 'Faster' : 'Slower'} response cycle`;
+        if (item.key === 'latency') return `${value < 90 ? 'Clean' : 'Noisy'} signal path`;
+        if (item.key === 'co2') return `${value < 414 ? 'Within' : 'Above'} control band`;
+        return item.trend === 'up' ? 'Improving margin' : item.trend === 'down' ? 'Reduced drag' : 'Monitor carefully';
+      }
+
+      function renderLegend() {
+        el.legendBox.innerHTML = '';
+        domainConfig.slice(0, 5).forEach(domain => {
+          const row = document.createElement('div');
+          row.className = 'item';
+          row.innerHTML = `<span><span class="swatch" style="background:${domain.color}; color:${domain.color}; display:inline-block"></span>${domain.label}</span><strong>${countNodes(domain.id)}</strong>`;
+          el.legendBox.appendChild(row);
+        });
+      }
+
+      function countNodes(domainId) {
+        return state.nodes.filter(n => n.domain === domainId).length;
+      }
+
+      function renderMicroStats() {
+        const stats = [
+          { label: 'Mean Node Pressure', value: `${Math.round(avg(state.nodes.map(n => n.signal)))}%`, note: 'Rolling average across active spatial nodes' },
+          { label: 'Critical Node Count', value: `${state.nodes.filter(n => n.criticality >= 80).length}`, note: 'Nodes above 80 criticality threshold' },
+          { label: 'Prediction Horizon', value: `${18 + (state.cycle % 12)} min`, note: 'Synthetic short-term forecast window' },
+          { label: 'Operator Bias', value: `${state.settings.baseThreatBias}`, note: 'Manual weighting from settings' }
+        ];
+        el.microStats.innerHTML = '';
+        stats.forEach(stat => {
+          const div = document.createElement('div');
+          div.className = 'microstat';
+          div.innerHTML = `<h4>${stat.label}</h4><strong>${stat.value}</strong><span style="color:var(--muted); font-size:0.76rem;">${stat.note}</span>`;
+          el.microStats.appendChild(div);
+        });
+      }
+
+      function avg(values) {
+        if (!values.length) return 0;
+        return values.reduce((sum, value) => sum + value, 0) / values.length;
+      }
+
+      function buildInsights() {
+        const sorted = [...state.nodes].sort((a, b) => (b.signal * b.criticality) - (a.signal * a.criticality));
+        const top = sorted.slice(0, 4);
+        state.insights = top.map((node, index) => {
+          const confidence = clamp(Math.round(76 + node.signal / 2 + node.criticality / 4 - index * 2), 60, 99);
+          const riskBand = node.signal > 55 ? 'high' : node.signal > 35 ? 'moderate' : 'low';
+          const domain = domainConfig.find(d => d.id === node.domain)?.label || node.domain;
+          const recommendation = recommend(node);
+          return {
+            id: `${node.id}-${index}`,
+            nodeId: node.id,
+            title: `${iconForDomain(node.domain)} ${node.name} · ${domain} deviation detected`,
+            confidence,
+            riskBand,
+            impact: `${Math.round(node.signal * 1.4)} signal weight`,
+            recommendation
+          };
+        });
+      }
+
+      function recommend(node) {
+        if (node.domain === 'security') return 'Verify surveillance path and dispatch focused patrol validation.';
+        if (node.domain === 'transit') return 'Shift route timing and release staggered reroute sequence.';
+        if (node.domain === 'energy') return 'Balance load against redundant lattice and protect reserve margin.';
+        if (node.domain === 'environment') return 'Increase sample cadence and trigger public-health watch if sustained.';
+        if (node.domain === 'logistics') return 'Prioritize fleet reroute, compress deadhead travel, protect delivery SLA.';
+        return 'Correlate cross-domain telemetry and inspect anomaly lineage.';
+      }
+
+      function renderInsights() {
+        el.insightList.innerHTML = '';
+        state.insights
+          .filter(item => state.settings.domain === 'advisor' || item.title.toLowerCase().includes(state.settings.domain) || byNodeDomain(item.nodeId) === state.settings.domain)
+          .forEach(item => {
+            const card = document.createElement('article');
+            card.className = 'insight';
+            card.style.borderLeftColor = getDomainColor(byNodeDomain(item.nodeId));
+            card.innerHTML = `
+              <h3>${item.title}</h3>
+              <div class="meta">
+                <span class="score">confidence ${item.confidence}%</span>
+                <span>risk ${item.riskBand}</span>
+                <span>${item.impact}</span>
+              </div>
+              <div class="submeta" style="margin-top:8px;">${item.recommendation}</div>
+            `;
+            card.addEventListener('click', () => {
+              state.selectedNodeId = item.nodeId;
+              const node = state.nodes.find(n => n.id === item.nodeId);
+              drawMap();
+              toast('Node highlighted', `${node.name} moved to active inspection context.`);
+              logLine(`Insight opened for ${node.name}.`, 'ok');
+            });
+            el.insightList.appendChild(card);
+          });
+      }
+
+      function byNodeDomain(nodeId) {
+        return state.nodes.find(node => node.id === nodeId)?.domain || 'digital';
+      }
+
+      function renderScenarios() {
+        el.scenarioGrid.innerHTML = '';
+        scenarioTemplates.forEach(template => {
+          const card = document.createElement('article');
+          card.className = 'scenario-card';
+          const active = state.activeScenario === template.id;
+          card.style.borderColor = active ? 'rgba(0,255,200,0.32)' : 'rgba(255,255,255,0.04)';
+          card.innerHTML = `
+            <h3>${template.title}</h3>
+            <p style="color:var(--muted); font-size:0.76rem; line-height:1.5;">${template.desc}</p>
+            <div class="bars">
+              ${Object.entries(template.metrics).map(([key, value]) => `
+                <div class="bar-row">
+                  <span>${key}</span>
+                  <div class="track"><div class="fill" style="width:${value}%"></div></div>
+                  <strong>${value}</strong>
+                </div>
+              `).join('')}
+            </div>
+            <button type="button">${active ? 'Selected' : 'Execute'} Scenario</button>
+          `;
+          card.querySelector('button').addEventListener('click', () => {
+            state.activeScenario = template.id;
+            renderScenarios();
+            applyScenario(template);
+          });
+          el.scenarioGrid.appendChild(card);
+        });
+      }
+
+      function applyScenario(template) {
+        const lift = template.metrics.safety > 85 ? -4 : template.metrics.speed > 85 ? 5 : 0;
+        state.nodes = state.nodes.map(node => ({
+          ...node,
+          signal: clamp(node.signal + rand(-7, 7) + lift + (template.id === 'conserve' && node.domain === 'energy' ? -10 : 0), 5, 98)
+        }));
+        buildInsights();
+        renderAllDynamic();
+        toast('Scenario executed', `${template.title} was applied to the active simulation.`);
+        logLine(`Scenario ${template.id} executed with safety=${template.metrics.safety}, speed=${template.metrics.speed}.`, 'ok');
+      }
+
+      function buildFeedItem() {
+        const node = pick(state.nodes);
+        const severity = node.signal > 58 ? 'critical' : node.signal > 40 ? 'warning' : 'info';
+        const templates = {
+          security: [
+            'Camera cadence drift exceeded baseline.',
+            'Patrol verification window widened beyond model tolerance.',
+            'Motion-cluster anomaly linked across two watch zones.'
+          ],
+          transit: [
+            'Transit demand surge predicted on eastbound corridor.',
+            'Signal cycle imbalance observed near rail junction.',
+            'Ridership pressure wave moving toward central hub.'
+          ],
+          logistics: [
+            'Fleet routing efficiency dropped below target band.',
+            'Deadhead mileage increased after checkpoint queue growth.',
+            'Delivery spine reroute recommended to protect SLA.'
+          ],
+          environment: [
+            'Air quality decline likely within next projection window.',
+            'Sensor confidence slipped after atmospheric spike.',
+            'Environmental drift linked to nearby grid event.'
+          ],
+          energy: [
+            'Reserve margin tightening on substation branch.',
+            'Load balancing trigger approaching threshold.',
+            'Grid oscillation remains contained but elevated.'
+          ],
+          digital: [
+            'Cross-domain twin correlation emitted mismatch warning.',
+            'Model lineage graph flagged causal divergence.',
+            'Digital twin confidence recovered after sync burst.'
+          ]
+        };
+
+        return {
+          id: cryptoRandom(),
+          nodeId: node.id,
+          severity,
+          title: `${iconForDomain(node.domain)} ${pick(templates[node.domain] || templates.digital)}`,
+          note: `${node.name} · criticality ${node.criticality} · signal ${Math.round(node.signal)}`,
+          time: formatTime()
+        };
+      }
+
+      function cryptoRandom() {
+        return Math.random().toString(36).slice(2, 10);
+      }
+
+      function renderFeed() {
+        el.feedList.innerHTML = '';
+        const filtered = state.feed.filter(item => {
+          if (state.settings.domain === 'advisor') return true;
+          return byNodeDomain(item.nodeId) === state.settings.domain || state.settings.domain === 'digital';
+        });
+
+        filtered.slice(0, 12).forEach(item => {
+          const card = document.createElement('article');
+          card.className = 'feed-item';
+          card.style.borderLeftColor = item.severity === 'critical' ? 'var(--bad)' : item.severity === 'warning' ? 'var(--warn)' : 'var(--info)';
+          card.innerHTML = `<h3>${item.title}</h3><div class="meta"><span>${item.time}</span><span>${item.severity}</span></div><small>${item.note}</small>`;
+          card.addEventListener('click', () => {
+            state.selectedNodeId = item.nodeId;
+            drawMap();
+            logLine(`Feed event selected: ${item.title}`, item.severity === 'critical' ? 'bad' : item.severity === 'warning' ? 'warn' : 'info');
+          });
+          el.feedList.appendChild(card);
+        });
+      }
+
+      function renderTimeline() {
+        el.timeline.innerHTML = '';
+        state.timeline.slice(0, 10).forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'timeline-item';
+          card.innerHTML = `<strong>${item.title}</strong><span>${item.time} · ${item.detail}</span>`;
+          card.addEventListener('click', () => {
+            if (item.nodeId) {
+              state.selectedNodeId = item.nodeId;
+              drawMap();
+            }
+            logLine(`Timeline focus set to ${item.title}.`, 'info');
+          });
+          el.timeline.appendChild(card);
+        });
+      }
+
+      function renderRisk() {
+        const metrics = [
+          { label: 'Threat', value: threatScore() },
+          { label: 'Confidence', value: clamp(Math.round(avg(state.insights.map(i => i.confidence))), 0, 100) || 0 },
+          { label: 'Readiness', value: clamp(Math.round(96 - activeIncidents().length * 3), 30, 98) },
+          { label: 'Stability', value: clamp(Math.round(100 - avg(state.nodes.map(n => n.signal))), 12, 96) }
+        ];
+        el.riskGrid.innerHTML = '';
+        metrics.forEach(metric => {
+          const div = document.createElement('div');
+          div.className = 'risk-box';
+          div.innerHTML = `
+            <h3>${metric.label}</h3>
+            <div class="ring" style="--deg:${metric.value * 3.6}deg"><strong>${metric.value}</strong></div>
+            <p style="color:var(--muted); font-size:0.76rem; text-align:center;">${describeMetric(metric.label, metric.value)}</p>
+          `;
+          el.riskGrid.appendChild(div);
+        });
+      }
+
+      function describeMetric(label, value) {
+        if (label === 'Threat') return value > 75 ? 'Elevated system pressure' : value > 50 ? 'Watch carefully' : 'Contained posture';
+        if (label === 'Confidence') return value > 90 ? 'Model agreement strong' : value > 75 ? 'Usable confidence' : 'Review recommended';
+        if (label === 'Readiness') return value > 80 ? 'Operators positioned' : value > 60 ? 'Functional coverage' : 'Thin capacity';
+        return value > 70 ? 'Twin remains stable' : value > 45 ? 'Recoverable drift' : 'Structural stress';
+      }
+
+      function renderStaticLabels() {
+        el.activeModeLabel.textContent = state.settings.mode.toUpperCase();
+        el.activeDomainLabel.textContent = (domainConfig.find(d => d.id === state.settings.domain)?.label || state.settings.domain).toUpperCase();
+        el.threatLabel.textContent = String(threatScore());
+        el.incidentCountLabel.textContent = String(activeIncidents().length);
+        el.systemStateText.textContent = threatScore() >= 76 ? 'SYSTEM STATE · CONTESTED' : threatScore() >= 56 ? 'SYSTEM STATE · ELEVATED' : 'SYSTEM STATE · COHERENT';
+        el.computeValue.textContent = `${clamp(Math.round(61 + threatScore() * 0.26), 40, 97)}%`;
+        el.ingestValue.textContent = `${(1.12 + activeIncidents().length * 0.03).toFixed(2)}M/s`;
+      }
+
+      function renderAllDynamic() {
+        renderKpis();
+        renderLegend();
+        renderMicroStats();
+        renderInsights();
+        renderScenarios();
+        renderFeed();
+        renderTimeline();
+        renderRisk();
+        renderStaticLabels();
+        drawMap();
+        drawTrend();
+      }
+
+      function iconForDomain(domain) {
+        return domainConfig.find(item => item.id === domain)?.icon || '•';
+      }
+
+      function evolveNodes() {
+        const scenario = scenarioTemplates.find(s => s.id === state.activeScenario) || scenarioTemplates[0];
+        state.nodes = state.nodes.map(node => {
+          let shift = rand(-5, 5);
+          if (state.settings.domain === node.domain) shift += rand(1, 5);
+          if (state.settings.mode === node.domain) shift += rand(2, 6);
+          if (scenario.id === 'stabilize' && node.domain === 'security') shift -= rand(2, 7);
+          if (scenario.id === 'optimize' && (node.domain === 'transit' || node.domain === 'logistics')) shift -= rand(2, 5);
+          if (scenario.id === 'conserve' && node.domain === 'energy') shift -= rand(4, 9);
+          if (scenario.id === 'surgical' && node.criticality > 80) shift -= rand(1, 6);
+          return {
+            ...node,
+            signal: clamp(node.signal + shift, 5, 99),
+            criticality: clamp(node.criticality + rand(-2, 2), 35, 99)
+          };
+        });
+      }
+
+      function updateSeries() {
+        state.trendSeries.push({
+          threat: threatScore(),
+          confidence: clamp(Math.round(avg(state.insights.map(i => i.confidence))) || 0, 20, 99),
+          stability: clamp(Math.round(100 - avg(state.nodes.map(n => n.signal))), 0, 100)
+        });
+        if (state.trendSeries.length > 24) state.trendSeries.shift();
+      }
+
+      function pushEvent(title, detail, nodeId = null) {
+        state.timeline.unshift({ title, detail, nodeId, time: formatTime() });
+        if (state.timeline.length > 16) state.timeline.pop();
+      }
+
+      function detectEscalations() {
+        const hot = state.nodes.filter(node => node.signal > 64);
+        if (!hot.length) return;
+        const node = hot.sort((a, b) => b.signal - a.signal)[0];
+        const eventTitle = `${iconForDomain(node.domain)} ${node.name}`;
+        const detail = node.signal > 80 ? 'critical pressure spike' : 'elevated anomaly burst';
+        pushEvent(eventTitle, detail, node.id);
+        state.feed.unshift(buildFeedItem());
+        while (state.feed.length > 24) state.feed.pop();
+        if (node.signal > 82) {
+          toast('Critical node pressure', `${node.name} exceeded severe anomaly threshold.`);
+          logLine(`${node.name} breached critical threshold at signal=${Math.round(node.signal)}.`, 'bad');
+        } else {
+          logLine(`${node.name} entered elevated watch state.`, 'warn');
+        }
+      }
+
+      function seedInitialData() {
+        for (let i = 0; i < 10; i += 1) {
+          state.feed.unshift(buildFeedItem());
+        }
+        pushEvent('Grid sync restored', 'substation fault resolved', 'sub-12');
+        pushEvent('Transit wave detected', 'east corridor demand spike', 'rail-east');
+        pushEvent('Camera anomaly flagged', 'zone 7 mesh verification pending', 'zone-7');
+        buildInsights();
+        for (let i = 0; i < 24; i += 1) {
+          evolveNodes();
+          buildInsights();
+          updateSeries();
+        }
+      }
+
+      function drawMap() {
+        const canvas = el.mapCanvas;
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(800, Math.floor(rect.width * dpr));
+        const height = Math.max(440, Math.floor(rect.height * dpr));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+
+        const ctx = mapCtx;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        const w = rect.width;
+        const h = rect.height;
+
+        drawMapBackground(ctx, w, h);
+        drawLinks(ctx, w, h);
+        drawNodes(ctx, w, h);
+        drawHud(ctx, w, h);
+        ctx.restore();
+      }
+
+      function drawMapBackground(ctx, w, h) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0,255,200,0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= w; x += 42) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= h; y += 42) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+
+        const glow = ctx.createRadialGradient(w * 0.48, h * 0.42, 20, w * 0.48, h * 0.42, Math.min(w, h) * 0.45);
+        glow.addColorStop(0, 'rgba(0,255,200,0.12)');
+        glow.addColorStop(1, 'rgba(0,255,200,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+
+      function nodeById(id) {
+        return state.nodes.find(node => node.id === id);
+      }
+
+      function drawLinks(ctx, w, h) {
+        ctx.save();
+        links.forEach(([aId, bId]) => {
+          const a = nodeById(aId);
+          const b = nodeById(bId);
+          if (!a || !b) return;
+          const ax = a.x * w;
+          const ay = a.y * h;
+          const bx = b.x * w;
+          const by = b.y * h;
+          const highlight = state.selectedNodeId === a.id || state.selectedNodeId === b.id;
+          ctx.strokeStyle = highlight ? 'rgba(255,255,255,0.55)' : 'rgba(0,255,200,0.26)';
+          ctx.lineWidth = highlight ? 2.3 : 1.2;
+          ctx.setLineDash(highlight ? [] : [6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      function drawNodes(ctx, w, h) {
+        state.nodes.forEach(node => {
+          const x = node.x * w;
+          const y = node.y * h;
+          const activeDomain = state.settings.domain === 'advisor' || state.settings.domain === node.domain;
+          const modeMatch = state.settings.mode === 'city' || state.settings.mode === node.domain;
+          const selected = state.selectedNodeId === node.id;
+          const radius = 7 + (node.criticality / 100) * 7;
+          const color = activeDomain && modeMatch ? getDomainColor(node.domain) : 'rgba(99,127,145,0.55)';
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.fillStyle = colorize(color, 0.18);
+          ctx.arc(x, y, radius * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.lineWidth = selected ? 3 : 1.5;
+          ctx.strokeStyle = selected ? '#ffffff' : colorize(color, 0.9);
+          ctx.stroke();
+
+          ctx.fillStyle = '#d9f5ff';
+          ctx.font = '12px Inter, sans-serif';
+          ctx.fillText(node.name, x + 12, y - 10);
+
+          ctx.fillStyle = 'rgba(220,239,248,0.72)';
+          ctx.font = '11px Inter, sans-serif';
+          ctx.fillText(`sig ${Math.round(node.signal)} · crit ${Math.round(node.criticality)}`, x + 12, y + 8);
+
+          if (selected) {
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.arc(x, y, radius * 2.8, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
+      function drawHud(ctx, w, h) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(3, 10, 16, 0.82)';
+        ctx.strokeStyle = 'rgba(0,255,200,0.12)';
+        roundedRect(ctx, 16, h - 70, 320, 50, 12, true, true);
+        ctx.fillStyle = '#d8edf8';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.fillText(`CITY: ${state.settings.cityLabel}`, 30, h - 44);
+        ctx.fillText(`OPERATOR: ${state.settings.operatorLabel}`, 30, h - 25);
+        ctx.fillStyle = 'rgba(179, 207, 221, 0.72)';
+        ctx.fillText(`THREAT ${threatScore()} · SCENARIO ${state.activeScenario.toUpperCase()} · MODE ${state.settings.mode.toUpperCase()}`, 170, h - 25);
+        ctx.restore();
+      }
+
+      function roundedRect(ctx, x, y, width, height, radius, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+
+      function colorize(hexOrRgb, alpha) {
+        if (hexOrRgb.startsWith('rgba')) {
+          return hexOrRgb.replace(/rgba\(([^)]+),[^)]+\)/, `rgba($1, ${alpha})`);
+        }
+        if (hexOrRgb.startsWith('#')) {
+          const hex = hexOrRgb.replace('#', '');
+          const full = hex.length === 3 ? hex.split('').map(v => v + v).join('') : hex;
+          const int = parseInt(full, 16);
+          const r = (int >> 16) & 255;
+          const g = (int >> 8) & 255;
+          const b = int & 255;
+          return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        return hexOrRgb;
+      }
+
+      function drawTrend() {
+        const canvas = el.trendCanvas;
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(700, Math.floor(rect.width * dpr));
+        const height = Math.max(220, Math.floor(rect.height * dpr));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+
+        const ctx = trendCtx;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const w = rect.width;
+        const h = rect.height;
+        const pad = { top: 16, right: 18, bottom: 28, left: 36 };
+        const plotW = w - pad.left - pad.right;
+        const plotH = h - pad.top - pad.bottom;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i += 1) {
+          const y = pad.top + (plotH / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(pad.left, y);
+          ctx.lineTo(w - pad.right, y);
+          ctx.stroke();
+        }
+
+        ['Threat', 'Confidence', 'Stability'].forEach((label, index) => {
+          ctx.fillStyle = ['#00ffc8', '#a275ff', '#ffbe55'][index];
+          ctx.fillRect(pad.left + index * 112, 4, 14, 6);
+          ctx.fillStyle = '#b8cede';
+          ctx.font = '12px Inter, sans-serif';
+          ctx.fillText(label, pad.left + 20 + index * 112, 11);
+        });
+
+        drawSeries(ctx, state.trendSeries.map(i => i.threat), '#00ffc8', pad, plotW, plotH);
+        drawSeries(ctx, state.trendSeries.map(i => i.confidence), '#a275ff', pad, plotW, plotH);
+        drawSeries(ctx, state.trendSeries.map(i => i.stability), '#ffbe55', pad, plotW, plotH);
+
+        ctx.fillStyle = 'rgba(184,206,222,0.72)';
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText('0', 12, h - pad.bottom);
+        ctx.fillText('100', 6, pad.top + 5);
+        ctx.restore();
+      }
+
+      function drawSeries(ctx, values, color, pad, plotW, plotH) {
+        if (values.length < 2) return;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        values.forEach((value, index) => {
+          const x = pad.left + (plotW / (values.length - 1)) * index;
+          const y = pad.top + plotH - (value / 100) * plotH;
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        values.forEach((value, index) => {
+          const x = pad.left + (plotW / (values.length - 1)) * index;
+          const y = pad.top + plotH - (value / 100) * plotH;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function processQuery(raw) {
+        const q = raw.trim().toLowerCase();
+        if (!q) return;
+
+        if (/threat|matrix|risk/.test(q)) {
+          state.settings.mode = 'security';
+          state.settings.domain = 'security';
+          renderModes();
+          renderNav();
+          renderAllDynamic();
+          toast('Threat matrix loaded', 'Security domain promoted to active operational focus.');
+          logLine('Natural-language query promoted security threat matrix.', 'ok');
+          return;
+        }
+
+        if (/fleet|logistics|route/.test(q)) {
+          state.activeScenario = 'optimize';
+          state.settings.domain = 'logistics';
+          state.settings.mode = 'transit';
+          buildInsights();
+          renderModes();
+          renderNav();
+          renderAllDynamic();
+          toast('Route optimization engaged', 'Logistics and transit were synchronized for throughput.');
+          logLine('Query triggered fleet/logistics optimization profile.', 'ok');
+          return;
+        }
+
+        if (/energy|grid|power/.test(q)) {
+          state.settings.mode = 'energy';
+          state.settings.domain = 'energy';
+          renderModes();
+          renderNav();
+          renderAllDynamic();
+          toast('Grid view ready', 'Energy nodes elevated for operator inspection.');
+          logLine('Query shifted command center to energy posture.', 'ok');
+          return;
+        }
+
+        if (/stabilize|safe|safety|lock/.test(q)) {
+          applyScenario(scenarioTemplates.find(s => s.id === 'stabilize'));
+          return;
+        }
+
+        if (/conserve|green|sustain/.test(q)) {
+          applyScenario(scenarioTemplates.find(s => s.id === 'conserve'));
+          return;
+        }
+
+        if (/anomaly|explain|show/.test(q)) {
+          state.selectedNodeId = state.insights[0]?.nodeId || state.nodes[0]?.id || null;
+          drawMap();
+          toast('Anomaly explanation', state.insights[0]?.recommendation || 'No high-confidence anomaly present.');
+          logLine('Query opened top-ranked anomaly context.', 'info');
+          return;
+        }
+
+        toast('Query acknowledged', 'Command understood, but no dedicated parser matched it. General advisory returned.');
+        logLine(`Unhandled query parsed as advisory: "${q}"`, 'warn');
+      }
+
+      function tick() {
+        if (!state.running) return;
+        state.cycle += 1;
+        evolveNodes();
+        buildInsights();
+        updateSeries();
+        detectEscalations();
+        renderAllDynamic();
+      }
+
+      function startTicker() {
+        stopTicker();
+        state.timer = setInterval(tick, Number(state.settings.tickRate || 1800));
+      }
+
+      function stopTicker() {
+        if (state.timer) clearInterval(state.timer);
+      }
+
+      function bindEvents() {
+        el.queryBtn.addEventListener('click', () => {
+          processQuery(el.queryInput.value);
+          el.queryInput.value = '';
+        });
+
+        el.queryInput.addEventListener('keydown', event => {
+          if (event.key === 'Enter') {
+            processQuery(el.queryInput.value);
+            el.queryInput.value = '';
+          }
+        });
+
+        el.pauseBtn.addEventListener('click', () => {
+          state.running = !state.running;
+          el.pauseBtn.textContent = state.running ? 'Pause Simulation' : 'Resume Simulation';
+          toast(state.running ? 'Simulation resumed' : 'Simulation paused', 'Realtime synthetic updates were toggled.');
+          logLine(`Simulation ${state.running ? 'resumed' : 'paused'}.`, state.running ? 'ok' : 'warn');
+        });
+
+        el.settingsBtn.addEventListener('click', openSettings);
+        el.closeSettingsBtn.addEventListener('click', closeSettings);
+        el.settingsModal.addEventListener('click', event => {
+          if (event.target === el.settingsModal) closeSettings();
+        });
+
+        el.resetSettingsBtn.addEventListener('click', () => {
+          state.settings = { ...defaults };
+          hydrateSettingsForm();
+          toast('Defaults restored', 'Form values returned to baseline.');
+        });
+
+        el.saveSettingsBtn.addEventListener('click', () => {
+          state.settings = {
+            cityLabel: el.cityLabelInput.value.trim() || defaults.cityLabel,
+            operatorLabel: el.operatorInput.value.trim() || defaults.operatorLabel,
+            baseThreatBias: clamp(Number(el.baseThreatInput.value || defaults.baseThreatBias), 0, 100),
+            tickRate: clamp(Number(el.tickRateInput.value || defaults.tickRate), 500, 10000),
+            mode: el.modeSelect.value,
+            domain: el.domainSelect.value,
+            annotation: el.annotationInput.value.trim() || defaults.annotation
+          };
+          saveSettings();
+          renderModes();
+          renderNav();
+          renderAllDynamic();
+          startTicker();
+          closeSettings();
+          toast('Settings saved', 'Simulation settings applied successfully.');
+          logLine('Operator settings were updated and persisted to localStorage.', 'ok');
+        });
+
+        window.addEventListener('resize', () => {
+          drawMap();
+          drawTrend();
+        });
+
+        el.mapCanvas.addEventListener('click', handleMapClick);
+      }
+
+      function handleMapClick(event) {
+        const rect = el.mapCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const hit = state.nodes.find(node => {
+          const dx = x - node.x * rect.width;
+          const dy = y - node.y * rect.height;
+          const r = 9 + (node.criticality / 100) * 7;
+          return Math.sqrt(dx * dx + dy * dy) <= r + 8;
+        });
+        if (!hit) return;
+        state.selectedNodeId = hit.id;
+        drawMap();
+        toast('Map node selected', `${hit.name} · signal ${Math.round(hit.signal)} · criticality ${Math.round(hit.criticality)}`);
+        logLine(`Map node selected: ${hit.name}.`, 'info');
+      }
+
+      function openSettings() {
+        hydrateSettingsForm();
+        el.settingsModal.classList.add('open');
+      }
+
+      function closeSettings() {
+        el.settingsModal.classList.remove('open');
+      }
+
+      function hydrateSettingsForm() {
+        el.cityLabelInput.value = state.settings.cityLabel;
+        el.operatorInput.value = state.settings.operatorLabel;
+        el.baseThreatInput.value = state.settings.baseThreatBias;
+        el.tickRateInput.value = state.settings.tickRate;
+        el.modeSelect.value = state.settings.mode;
+        el.annotationInput.value = state.settings.annotation;
+        el.domainSelect.innerHTML = domainConfig.map(domain => `<option value="${domain.id}">${domain.label}</option>`).join('');
+        el.domainSelect.value = state.settings.domain;
+      }
+
+      function init() {
+        renderNav();
+        renderModes();
+        hydrateSettingsForm();
+        seedInitialData();
+        renderAllDynamic();
+        bindEvents();
+        startTicker();
+        logLine('Enhanced command center initialized successfully.', 'ok');
+        logLine(`Operator note: ${state.settings.annotation}`, 'info');
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

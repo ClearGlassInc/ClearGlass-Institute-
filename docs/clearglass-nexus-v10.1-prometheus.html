@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <title>ClearGlass NEXUS v10.1 | PROMETHEUS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0c12;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            color: #c0e0ff;
+            line-height: 1.4;
+            padding: 16px;
+        }
+        /* Cyber glass panel */
+        .glass {
+            background: rgba(10, 20, 30, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 128, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #0f0, #0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .badge {
+            font-size: 0.8rem;
+            background: #1e2a2a;
+            padding: 4px 12px;
+            border-radius: 40px;
+            border-left: 3px solid #0f0;
+        }
+        /* Tabs (33 tabs) */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 20px 0 12px;
+            border-bottom: 1px solid #2a3a3a;
+            padding-bottom: 8px;
+        }
+        .tab-btn {
+            background: #11181f;
+            border: none;
+            color: #9ab3c7;
+            padding: 6px 14px;
+            border-radius: 24px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #1e4a3a;
+            color: #0f0;
+            box-shadow: 0 0 8px #0f08;
+            border: 1px solid #0f0;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        /* Cards and grids */
+        .feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .feed-card {
+            background: #0f1a1f;
+            border-radius: 20px;
+            padding: 12px;
+            border: 1px solid #2f4f4f;
+        }
+        .feed-title {
+            font-weight: bold;
+            border-bottom: 1px dashed #2f8f8f;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .feed-content {
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .btn {
+            background: #1e3a3a;
+            border: none;
+            color: #b0ffb0;
+            padding: 6px 12px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-danger {
+            background: #5a1e1e;
+            color: #ffb0b0;
+        }
+        /* Kanban */
+        .kanban-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .kanban-col {
+            flex: 1;
+            min-width: 200px;
+            background: #0b1116;
+            border-radius: 16px;
+            padding: 12px;
+        }
+        .kanban-col h3 {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .kanban-item {
+            background: #1a2a2f;
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 12px;
+            cursor: grab;
+            border-left: 3px solid #0f0;
+        }
+        .kanban-item:active { cursor: grabbing; }
+        /* Monte Carlo */
+        .mc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        .mc-table th, .mc-table td {
+            border: 1px solid #2f4f4f;
+            padding: 6px;
+            text-align: center;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #0c141c;
+            max-width: 500px;
+            width: 90%;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid #0f0;
+        }
+        input, textarea, select {
+            background: #1a2a2a;
+            border: 1px solid #2f8f8f;
+            color: #c0ffc0;
+            padding: 8px;
+            width: 100%;
+            margin: 8px 0;
+            border-radius: 12px;
+        }
+        /* Scroll */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2f8f8f;
+            border-radius: 8px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2a2a;
+            padding: 10px 18px;
+            border-left: 4px solid #0f0;
+            border-radius: 12px;
+            z-index: 2000;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass header">
+    <div class="logo">◢ CLEARGLASS NEXUS ◣<span style="font-size: 0.9rem;"> v10.1</span></div>
+    <div class="badge">PROMETHEUS | Burlington ON</div>
+    <div><button id="claudeKeyBtn" class="btn">🔑 Claude Key</button></div>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+<div id="tabPanes"></div>
+
+<div id="claudeModal" class="modal">
+    <div class="modal-content">
+        <h3>Claude API Access</h3>
+        <input type="text" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+        <textarea id="claudePrompt" rows="3" placeholder="Ask Claude..."></textarea>
+        <button id="sendClaude" class="btn">Send</button>
+        <button id="closeModal" class="btn btn-danger">Cancel</button>
+        <div id="claudeResponse" style="margin-top:12px; font-size:0.8rem;"></div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('error', (e) => {
+        console.error('[NEXUS CAUGHT]', e.message, e.filename, e.lineno);
+        showToast('Script error caught: ' + e.message);
+        e.preventDefault();
+    });
+
+    function showToast(msg, isErr = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.borderLeftColor = isErr ? '#f66' : '#0f0';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    function loadData(key, def = null) {
+        try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; }
+    }
+
+    const tabNames = [
+        'Dashboard', 'Monte Carlo', 'Kanban', 'RFP Push', 'Win/Loss', 'Live Feeds',
+        'Threat Intel', 'Vulnerability', 'Incident', 'Compliance', 'Risk Score',
+        'Asset Map', 'User Behavior', 'Network Flow', 'EDR', 'Sandbox',
+        'Threat Hunt', 'Playbooks', 'SOAR', 'Reports', 'Audit Log', 'Settings',
+        'AI Analyst', 'Threat Feed', 'IOC DB', 'Malware Repo', 'MITRE ATT&CK',
+        'CVE Tracker', 'Patch Mgmt', 'Vulnerability Scan', 'Cloud Sec', 'Identity', 'NEXUS AI'
+    ];
+    let activeTab = 'Dashboard';
+
+    function renderTabs() {
+        const bar = document.getElementById('tabBar');
+        const panesDiv = document.getElementById('tabPanes');
+        bar.innerHTML = '';
+        panesDiv.innerHTML = '';
+        tabNames.forEach(name => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn' + (activeTab === name ? ' active' : '');
+            btn.innerText = name.substring(0, 10);
+            btn.title = name;
+            btn.addEventListener('click', () => switchTab(name));
+            bar.appendChild(btn);
+
+            const pane = document.createElement('div');
+            pane.className = 'tab-pane' + (activeTab === name ? ' active' : '');
+            pane.id = `pane-${name.replace(/\s/g, '')}`;
+            panesDiv.appendChild(pane);
+        });
+        buildPanes();
+    }
+
+    function switchTab(name) {
+        activeTab = name;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        const btns = document.querySelectorAll('.tab-btn');
+        const idx = tabNames.indexOf(name);
+        if (idx >= 0) btns[idx].classList.add('active');
+        const pane = document.getElementById(`pane-${name.replace(/\s/g, '')}`);
+        if (pane) pane.classList.add('active');
+        if (name === 'Live Feeds') refreshAllFeeds();
+        if (name === 'Monte Carlo') runMonteCarlo();
+        if (name === 'Kanban') renderKanban();
+        if (name === 'Win/Loss') renderWinLoss();
+    }
+
+    function buildPanes() {
+        const dashPane = document.getElementById('pane-Dashboard');
+        if (dashPane) dashPane.innerHTML = `<div class="glass"><h3>System Status</h3><p>All modules operational. Threats: 0 alerts.</p><p>Last Monte Carlo: ${loadData('mcLast', 'N/A')}</p><p>AI ready: ${loadData('claudeKey') ? 'Key present' : 'No key'}</p></div>`;
+
+        const mcPane = document.getElementById('pane-MonteCarlo');
+        if (mcPane) mcPane.innerHTML = `<div class="glass"><h3>Monte Carlo Simulation (10k runs)</h3><div><label>Initial Investment: $<input type="number" id="mcInvest" value="100000"></label> <label>Years: <input type="number" id="mcYears" value="10"></label> <button id="runMC" class="btn">Run</button></div><div id="mcResults"></div></div>`;
+        document.getElementById('runMC')?.addEventListener('click', runMonteCarlo);
+
+        const kanPane = document.getElementById('pane-Kanban');
+        if (kanPane) kanPane.innerHTML = `<div class="glass"><h3>Kanban Board</h3><div class="kanban-container" id="kanbanContainer"></div><div><input id="newTaskInput" placeholder="New task"><button id="addTaskBtn" class="btn">Add Task</button></div></div>`;
+        document.getElementById('addTaskBtn')?.addEventListener('click', addKanbanTask);
+
+        const wlPane = document.getElementById('pane-WinLoss');
+        if (wlPane) wlPane.innerHTML = `<div class="glass"><h3>Win/Loss Tracker</h3><div><input id="dealName" placeholder="Deal name"><select id="dealType"><option>Win</option><option>Loss</option></select><input id="dealAmount" placeholder="Amount"><button id="addDeal" class="btn">Add</button></div><div id="dealList"></div><div><strong>Total Wins: $<span id="totalWins">0</span> | Losses: $<span id="totalLosses">0</span></strong></div></div>`;
+        document.getElementById('addDeal')?.addEventListener('click', addDeal);
+
+        const feedPane = document.getElementById('pane-LiveFeeds');
+        if (feedPane) feedPane.innerHTML = `<div class="glass"><h3>Real-time Feeds</h3><div class="feed-grid" id="feedGrid"></div><button id="refreshFeeds" class="btn">Refresh All</button></div>`;
+        document.getElementById('refreshFeeds')?.addEventListener('click', refreshAllFeeds);
+
+        const rfpPane = document.getElementById('pane-RFPPush');
+        if (rfpPane) rfpPane.innerHTML = `<div class="glass"><h3>RFP Push</h3><textarea id="rfpText" placeholder="Paste RFP details..."></textarea><button id="pushRFP" class="btn">Push to Analysis</button><div id="rfpStatus"></div></div>`;
+        document.getElementById('pushRFP')?.addEventListener('click', () => {
+            const txt = document.getElementById('rfpText')?.value;
+            if (txt) showToast('RFP submitted (simulated)');
+            else showToast('Enter RFP text', true);
+        });
+
+        for (let name of tabNames) {
+            if (['Dashboard','Monte Carlo','Kanban','Win/Loss','Live Feeds','RFP Push'].includes(name)) continue;
+            const p = document.getElementById(`pane-${name.replace(/\s/g, '')}`);
+            if (p) p.innerHTML = `<div class="glass"><h3>${name}</h3><p>Module ready. Integrations coming.</p></div>`;
+        }
+    }
+
+    function runMonteCarlo() {
+        try {
+            const invest = parseFloat(document.getElementById('mcInvest')?.value || 100000);
+            const years = parseInt(document.getElementById('mcYears')?.value || 10);
+            const runs = 10000;
+            let finalValues = [];
+            for (let i=0; i<runs; i++) {
+                let value = invest;
+                for (let y=0; y<years; y++) {
+                    let ret = (Math.random() * 0.3) - 0.05;
+                    value *= (1 + ret);
+                }
+                finalValues.push(value);
+            }
+            finalValues.sort((a,b)=>a-b);
+            const p5 = finalValues[Math.floor(runs*0.05)];
+            const median = finalValues[Math.floor(runs*0.5)];
+            const p95 = finalValues[Math.floor(runs*0.95)];
+            const html = `<table class="mc-table"><tr><th>5% Percentile</th><th>Median</th><th>95% Percentile</th></tr><tr><td>$${Math.round(p5)}</td><td>$${Math.round(median)}</td><td>$${Math.round(p95)}</td></tr></table>`;
+            document.getElementById('mcResults').innerHTML = html;
+            saveData('mcLast', new Date().toLocaleString());
+        } catch(e) { showToast('MC error: '+e.message, true); }
+    }
+
+    let kanbanData = loadData('kanban', { todo: [], inprogress: [], done: [] });
+    function renderKanban() {
+        const container = document.getElementById('kanbanContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const columns = ['todo','inprogress','done'];
+        const titles = ['To Do','In Progress','Done'];
+        columns.forEach((col, idx) => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'kanban-col';
+            colDiv.setAttribute('data-col', col);
+            colDiv.innerHTML = `<h3>${titles[idx]}</h3><div class="kanban-items" id="kanban-${col}"></div>`;
+            container.appendChild(colDiv);
+            const itemsDiv = colDiv.querySelector('.kanban-items');
+            (kanbanData[col] || []).forEach((task, i) => {
+                const item = document.createElement('div');
+                item.className = 'kanban-item';
+                item.draggable = true;
+                item.innerText = task;
+                item.setAttribute('data-task', task);
+                item.setAttribute('data-col', col);
+                item.setAttribute('data-index', i);
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                itemsDiv.appendChild(item);
+            });
+            itemsDiv.addEventListener('dragover', (e) => e.preventDefault());
+            itemsDiv.addEventListener('drop', handleDrop);
+        });
+    }
+    let draggedItem = null;
+    function handleDragStart(e) { draggedItem = e.target; e.dataTransfer.setData('text/plain', e.target.innerText); }
+    function handleDragEnd(e) { draggedItem = null; }
+    function handleDrop(e) {
+        e.preventDefault();
+        const targetCol = e.currentTarget.closest('.kanban-col')?.getAttribute('data-col');
+        if (!targetCol || !draggedItem) return;
+        const taskText = draggedItem.innerText;
+        const sourceCol = draggedItem.getAttribute('data-col');
+        if (sourceCol === targetCol) return;
+        kanbanData[sourceCol] = kanbanData[sourceCol].filter(t => t !== taskText);
+        kanbanData[targetCol].push(taskText);
+        saveData('kanban', kanbanData);
+        renderKanban();
+    }
+    function addKanbanTask() {
+        const input = document.getElementById('newTaskInput');
+        if (!input || !input.value.trim()) return;
+        kanbanData.todo.push(input.value.trim());
+        saveData('kanban', kanbanData);
+        renderKanban();
+        input.value = '';
+    }
+
+    let deals = loadData('deals', []);
+    function renderWinLoss() {
+        const listDiv = document.getElementById('dealList');
+        if (!listDiv) return;
+        listDiv.innerHTML = '';
+        let winSum = 0, lossSum = 0;
+        deals.forEach((deal, idx) => {
+            const div = document.createElement('div');
+            div.className = 'feed-card';
+            div.innerHTML = `<strong>${deal.name}</strong> - ${deal.type} - $${deal.amount} <button class="btn btn-danger" data-idx="${idx}">X</button>`;
+            div.querySelector('button')?.addEventListener('click', () => {
+                deals.splice(idx,1);
+                saveData('deals', deals);
+                renderWinLoss();
+            });
+            listDiv.appendChild(div);
+            if (deal.type === 'Win') winSum += parseFloat(deal.amount);
+            else lossSum += parseFloat(deal.amount);
+        });
+        document.getElementById('totalWins').innerText = winSum;
+        document.getElementById('totalLosses').innerText = lossSum;
+    }
+    function addDeal() {
+        const name = document.getElementById('dealName')?.value;
+        const type = document.getElementById('dealType')?.value;
+        const amount = parseFloat(document.getElementById('dealAmount')?.value);
+        if (!name || isNaN(amount)) return showToast('Invalid deal info', true);
+        deals.push({ name, type, amount });
+        saveData('deals', deals);
+        renderWinLoss();
+        document.getElementById('dealName').value = '';
+        document.getElementById('dealAmount').value = '';
+    }
+
+    const feedDefs = [
+        { name: 'NVD (CVEs)', url: 'https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=3', parse: (d) => d.vulnerabilities?.map(v=>v.cve.id).join(', ') || 'No data' },
+        { name: 'GDELT', url: 'https://api.gdeltproject.org/api/v2/doc/doc?query=cyber&format=json&maxrecords=3', parse: (d) => d.articles?.map(a=>a.title).join(', ') || 'N/A' },
+        { name: 'ADS-B Exchange', url: 'https://public-api.adsbexchange.com/VirtualRadar/AircraftList.json?fDstL=0&fDstU=100', parse: (d) => d.acList?.slice(0,3).map(a=>a.Icao).join(', ') || 'No flights' },
+        { name: 'USGS Earthquakes', url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson', parse: (d) => d.features?.slice(0,3).map(f=>f.properties.place).join('; ') || 'None' },
+        { name: 'HackerNews', url: 'https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty', parse: async (d) => { let ids = d.slice(0,3); let titles = await Promise.all(ids.map(id=>fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r=>r.json()).then(j=>j.title).catch(()=>''))); return titles.join(', '); } },
+        { name: 'Open-Meteo', url: 'https://api.open-meteo.com/v1/forecast?latitude=43.45&longitude=-79.68&current_weather=true', parse: (d) => `${d.current_weather.temperature}°C, wind ${d.current_weather.windspeed}km/h` },
+        { name: 'GitHub Events', url: 'https://api.github.com/events', parse: (d) => d.slice(0,3).map(e=>e.type).join(', ') }
+    ];
+    async function fetchFeed(feed) {
+        try {
+            const resp = await fetch(feed.url);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            let data = await resp.json();
+            let content = typeof feed.parse === 'function' ? await feed.parse(data) : 'Unparsed';
+            return content || 'No data';
+        } catch (err) {
+            console.warn(`Feed ${feed.name} error:`, err);
+            return `⚠️ Error: ${err.message}`;
+        }
+    }
+    async function refreshAllFeeds() {
+        const grid = document.getElementById('feedGrid');
+        if (!grid) return;
+        grid.innerHTML = '<div>Loading feeds...</div>';
+        let feedsHtml = '';
+        for (let feed of feedDefs) {
+            const content = await fetchFeed(feed);
+            feedsHtml += `<div class="feed-card"><div class="feed-title">${feed.name}</div><div class="feed-content">${content}</div></div>`;
+        }
+        grid.innerHTML = feedsHtml;
+    }
+
+    const modal = document.getElementById('claudeModal');
+    document.getElementById('claudeKeyBtn').onclick = () => modal.style.display = 'flex';
+    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+    document.getElementById('sendClaude').onclick = async () => {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        if (!key) { showToast('Enter API key', true); return; }
+        saveData('claudeKey', key);
+        const prompt = document.getElementById('claudePrompt').value;
+        if (!prompt) { showToast('Enter prompt', true); return; }
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'x-api-key': key,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-5-sonnet-20241022',
+                    max_tokens: 300,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            const reply = data.content[0].text;
+            document.getElementById('claudeResponse').innerHTML = `<strong>Claude:</strong> ${reply}`;
+        } catch (err) {
+            document.getElementById('claudeResponse').innerHTML = `<span style="color:#f66">Error: ${err.message}</span>`;
+            showToast('Claude request failed', true);
+        }
+    };
+
+    renderTabs();
+    refreshAllFeeds();
+    renderKanban();
+    renderWinLoss();
+    setInterval(() => { if (activeTab === 'Live Feeds') refreshAllFeeds(); }, 30000);
+</script>
+</body>
+</html>

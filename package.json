@@ -1,0 +1,67 @@
+{
+  "name": "@clearglassinc/opal-koboi",
+  "version": "2.1.3",
+  "description": "ClearGlass Inc. enterprise automation platform for mission planning, workflow orchestration, policy control, audit logging, and operational intelligence.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ClearGlass Inc.",
+  "homepage": "https://clearglassinc.github.io/opal/",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "opal-koboi": "./bin/opal-koboi.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClearGlassInc/Opal-Koboi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ClearGlassInc/Opal-Koboi/issues"
+  },
+  "keywords": [
+    "clearglass",
+    "opal-koboi",
+    "automation",
+    "orchestration",
+    "operations",
+    "intelligence",
+    "workflow-control",
+    "audit",
+    "policy",
+    "enterprise"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node bin/opal-koboi.js dashboard examples/mission.json",
+    "opal": "node bin/opal-koboi.js",
+    "status": "node bin/opal-koboi.js status",
+    "plan": "node bin/opal-koboi.js plan examples/mission.json",
+    "run": "node bin/opal-koboi.js run examples/mission.json",
+    "orchestrate": "node bin/opal-koboi.js orchestrate examples/workflow.json",
+    "dashboard": "node bin/opal-koboi.js dashboard examples/mission.json",
+    "content:deploy": "node bin/opal-koboi.js deploy-content examples/trust-infrastructure-campaign.json output/trust-infrastructure",
+    "validate": "node scripts/validate-package.mjs",
+    "test": "npm run validate && node test/opal-koboi.test.mjs",
+    "build": "node scripts/build-package.mjs",
+    "ci": "npm test && npm run build",
+    "demo": "npm run dashboard && npm run orchestrate",
+    "prepack": "npm run ci"
+  },
+  "files": [
+    "README.md",
+    "LICENSE*",
+    "bin/**/*",
+    "docs/**/*",
+    "src/**/*",
+    "examples/**/*",
+    "dist/**/*",
+    "package.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
