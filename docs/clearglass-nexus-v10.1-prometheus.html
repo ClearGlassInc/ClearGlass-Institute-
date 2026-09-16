@@ -248,6 +248,11 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (ch) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[ch]);
+    }
     function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
     function loadData(key, def = null) {
         try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; }
@@ -474,7 +479,9 @@
         let feedsHtml = '';
         for (let feed of feedDefs) {
             const content = await fetchFeed(feed);
-            feedsHtml += `<div class="feed-card"><div class="feed-title">${feed.name}</div><div class="feed-content">${content}</div></div>`;
+            // `content` is third-party feed text (and upstream error strings);
+            // it must never be parsed as markup in this origin.
+            feedsHtml += `<div class="feed-card"><div class="feed-title">${feed.name}</div><div class="feed-content">${escapeHtml(content)}</div></div>`;
         }
         grid.innerHTML = feedsHtml;
     }

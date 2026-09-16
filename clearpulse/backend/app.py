@@ -8,15 +8,27 @@ PostgreSQL and run the gateway as a stateless replica behind the API gateway.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from clearpulse.compliance.scanner import assert_paths_within_root
 from clearpulse.pipeline import ClearPulsePipeline
 
 app = FastAPI(title="ClearPulse Triage & Compliance Gateway")
 pipeline = ClearPulsePipeline()
+
+
+def _scan_root() -> str:
+    """Subtree that ``/v1/compliance/scan`` is allowed to read.
+
+    Defaults to the gateway's working directory so the reference deployment
+    needs no extra configuration; set ``CLEARPULSE_SCAN_ROOT`` to point the
+    scan at a dedicated at-rest data mount instead.
+    """
+    return os.environ.get("CLEARPULSE_SCAN_ROOT") or os.getcwd()
 
 
 class EncounterBundle(BaseModel):
@@ -63,6 +75,12 @@ def ingest_access(entry: AccessLogEntry) -> dict[str, Any]:
 
 @app.post("/v1/compliance/scan")
 def run_scan(req: ScanRequest) -> dict[str, Any]:
+    # The path list arrives from an untrusted caller; confine it to the
+    # permitted subtree before any filesystem walk or read happens.
+    try:
+        assert_paths_within_root(req.paths, _scan_root())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     raised = pipeline.scan_paths(req.paths)
     return {"status": "completed", "alerts": [
         {"alert_id": a.alert_id, "alert_type": a.alert_type,

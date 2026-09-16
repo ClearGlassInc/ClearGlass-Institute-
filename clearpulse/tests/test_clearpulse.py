@@ -17,6 +17,7 @@ from datetime import datetime, timedelta, timezone
 from clearpulse.alerts.router import AlertRouter
 from clearpulse.compliance.scanner import (
     PHIScanner,
+    assert_paths_within_root,
     mask_snippet,
     severity_from_findings,
 )
@@ -282,6 +283,58 @@ class PipelineTests(unittest.TestCase):
             alerts = ClearPulsePipeline().scan_paths([tmp])
         # Distinct files must each yield their own alert (per-file dedup key).
         self.assertEqual(len({a.payload["file_path"] for a in alerts}), 2)
+
+
+class ScanRootConfinementTests(unittest.TestCase):
+    """Guards the REST gateway's scan-path confinement.
+
+    The gateway hands caller-supplied paths to the scanner, so a path that
+    resolves outside the permitted root must be rejected before any walk or
+    read happens, while ordinary in-root targets keep working unchanged.
+    """
+
+    def test_in_root_paths_are_accepted(self):
+        with tempfile.TemporaryDirectory() as root:
+            nested = os.path.join(root, "data")
+            os.mkdir(nested)
+            target = os.path.join(nested, "discharge.csv")
+            with open(target, "w", encoding="utf-8") as fh:
+                fh.write("ssn\n123-45-6789\n")
+            # Relative, absolute, and the root itself all remain permitted.
+            assert_paths_within_root(["data", "data/discharge.csv"], root)
+            assert_paths_within_root([nested, target], root)
+            assert_paths_within_root(["."], root)
+
+    def test_absolute_path_outside_root_is_rejected(self):
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaises(ValueError):
+                assert_paths_within_root(["/etc"], root)
+
+    def test_dotdot_traversal_is_rejected(self):
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaises(ValueError):
+                assert_paths_within_root(["../.."], root)
+
+    def test_symlink_escaping_root_is_rejected(self):
+        with tempfile.TemporaryDirectory() as root:
+            link = os.path.join(root, "escape")
+            os.symlink("/etc", link)
+            with self.assertRaises(ValueError):
+                assert_paths_within_root(["escape"], root)
+
+    def test_rejection_happens_before_any_path_is_scanned(self):
+        # One bad entry invalidates the whole request: nothing is scanned.
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaises(ValueError):
+                assert_paths_within_root([".", "/etc"], root)
+
+    def test_scanner_itself_is_unrestricted_for_trusted_callers(self):
+        # The library contract is unchanged: CLI/demo/tests still scan freely.
+        with tempfile.TemporaryDirectory() as outside:
+            target = os.path.join(outside, "notes.csv")
+            with open(target, "w", encoding="utf-8") as fh:
+                fh.write("ssn\n123-45-6789\n")
+            self.assertTrue(PHIScanner().scan_paths([outside]))
 
 
 if __name__ == "__main__":
