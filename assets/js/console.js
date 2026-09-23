@@ -86,6 +86,8 @@
   /* ------------------------------------- 4. Animated metric counters */
   const counters = $$("[data-count]");
   const runCount = (el) => {
+    if (el.dataset.counted) return;        // guard against double-run (IO + sweep)
+    el.dataset.counted = "1";
     const target = parseFloat(el.dataset.count);
     const dec = (el.dataset.count.split(".")[1] || "").length;
     if (reduceMotion) { el.textContent = target.toFixed(dec); return; }
@@ -122,6 +124,35 @@
     });
   }, { threshold: 0.4 }) : null;
   bars.forEach((b) => { if (cioBars) cioBars.observe(b); else b.style.width = b.dataset.fill + "%"; });
+
+  /* --------------------- 5b. Scroll-past safety net for IO-driven effects
+     In-page anchor links, the mobile rail, the command palette, and loading
+     the page with a hash can scroll a target past the viewport faster than an
+     IntersectionObserver samples a threshold crossing. When that happens the
+     observer never fires, leaving [data-reveal] elements stuck at opacity:0
+     and [data-count] values stuck at 0 — permanently hidden content.
+     On scroll (rAF-throttled, passive) we resolve anything already scrolled
+     fully above the fold, which the observers may have skipped. Elements still
+     entering from below are left to the observers for their normal animation. */
+  if (!reduceMotion && (reveals.length || counters.length) && "IntersectionObserver" in window) {
+    let ticking = false;
+    const sweep = () => {
+      ticking = false;
+      reveals.forEach((el) => {
+        if (!el.classList.contains("is-in") && el.getBoundingClientRect().bottom < 0) {
+          el.classList.add("is-in");
+        }
+      });
+      counters.forEach((el) => {
+        if (!el.dataset.counted && el.getBoundingClientRect().bottom < 0) runCount(el);
+      });
+    };
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(sweep);
+    }, { passive: true });
+  }
 
   /* ----------------------------------------------- 6. Live mission clock */
   const clock = $("[data-clock]");
