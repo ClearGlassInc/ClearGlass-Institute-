@@ -5,7 +5,7 @@
 
 # Core Data Processing
 pandas>=3.0.5
-numpy>=2.5.3
+numpy>=2.5.4
 scipy>=1.18.1
 
 # Machine Learning & AI
