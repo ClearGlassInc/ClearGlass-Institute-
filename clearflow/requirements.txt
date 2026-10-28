@@ -7,7 +7,7 @@
 # FastAPI gateway in clearflow/backend/app.py.
 
 fastapi>=0.143.0
-pydantic>=2.13.5
+pydantic>=2.14.1
 uvicorn>=0.52.4
 
 # Optional production runtime (uncomment as the deployment matures):
