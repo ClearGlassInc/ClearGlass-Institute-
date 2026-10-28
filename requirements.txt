@@ -35,7 +35,7 @@ seaborn>=0.13.2
 
 # Data Export
 reportlab>=5.0.1  # PDF generation
-Pillow>=12.3.0    # Image processing
+Pillow>=13.0.0    # Image processing
 
 # Utilities
 python-dateutil>=2.9.0.post0
